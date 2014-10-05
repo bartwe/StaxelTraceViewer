@@ -23,3 +23,5 @@ Logger and visualizer that can be used to investigate where a program is spendin
             TraceRecorder.Stop();
         }
 ```
+
+![Screenshot of the vierwer being used to look at a single rendered frame in @StaxelGame](http://i.imgur.com/20yruDm.png)
