@@ -29,6 +29,11 @@ namespace Staxel.Trace {
         public static TraceKey ChunkRendererHelper_RenderUnprepared = new TraceKey(Color.LawnGreen);
         public static TraceKey WorldRenderer_NeedsBuilding = new TraceKey(Color.Orange);
         public static TraceKey WorldRenderer_RenderChunks = new TraceKey(Color.LightSkyBlue);
+        public static TraceKey WorldRenderer_RenderChunks_Render = new TraceKey(Color.Blue);
+        public static TraceKey WorldRenderer_RenderChunks_Prepare = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey SkyBoxRenderer_PreDraw = new TraceKey(Color.DeepSkyBlue);
+        public static TraceKey SkyBoxRenderer_PostDraw = new TraceKey(Color.LightSkyBlue);
+        public static TraceKey UniverseRenderer_DrawOverlay = new TraceKey(Color.MediumPurple);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);

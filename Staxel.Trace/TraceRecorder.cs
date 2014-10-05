@@ -30,14 +30,15 @@ namespace Staxel.Trace {
 
         private static int _ringTail;
         private static int _ringHead;
-        private static Stopwatch _stopwatch;
         private static FileStream _file;
+        private static long _epoch;
+        private static long _tickRation;
 
         public static void Start() {
             lock (Locker) {
-                _stopwatch = new Stopwatch();
-                _stopwatch.Start();
                 _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
+                _epoch = Stopwatch.GetTimestamp();
+                _tickRation = 1073741824000000L / Stopwatch.Frequency;
             }
         }
 
@@ -57,7 +58,7 @@ namespace Staxel.Trace {
                 return;
             TraceRecord traceRecord;
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
-            traceRecord.Timestamp = (int)((_stopwatch.ElapsedTicks * 1000000L) / Stopwatch.Frequency);
+            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
             traceRecord.Scope = (trace.Id << 1) | 1;
             lock (Locker) {
                 RingBuffer[_ringHead++] = traceRecord;
@@ -77,7 +78,7 @@ namespace Staxel.Trace {
                 return;
             TraceRecord traceRecord;
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
-            traceRecord.Timestamp = (int)((_stopwatch.ElapsedTicks * 1000000L) / Stopwatch.Frequency);
+            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
             traceRecord.Scope = (trace.Id << 1) | 0;
             lock (Locker) {
                 RingBuffer[_ringHead++] = traceRecord;

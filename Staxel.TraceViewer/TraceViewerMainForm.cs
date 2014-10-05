@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 using Staxel.Trace;
 
 namespace Staxel.TraceViewer {
@@ -127,6 +128,29 @@ namespace Staxel.TraceViewer {
             bgWorker.DoWork += (sender, doWorkEventArgs) => {
                 using (var g = Graphics.FromImage(_newScreenBuffer)) {
                     g.Clear(Color.LightGray);
+
+
+                    var renderLines = new Action<double, Pen>((interval, pen) => {
+                        var minFrame = (int)Math.Floor(minClamp / interval);
+                        var maxFrame = (int)Math.Ceiling(maxClamp / interval);
+
+                        if ((maxFrame - minFrame) < 20) {
+                            for (int i = minFrame; i <= maxFrame; ++i) {
+                                var px = (float)((i * interval - epoch) * xScale);
+                                g.DrawLine(pen, px, 0, px, _newScreenBuffer.Height);
+                            }
+                        }
+                    });
+                    const double fps = 60;
+                    const double fpsInterval = 1000000 / fps;
+                    const double milliSecondInterval = 1000000 / 1000;
+                    const double secondInterval = 1000000;
+                    const double minuteInterval = 1000000 * 60;
+
+                    renderLines(milliSecondInterval, Pens.White);
+                    renderLines(secondInterval, Pens.Gray);
+                    renderLines(minuteInterval, Pens.DarkGray);
+                    renderLines(fpsInterval, Pens.Black);
 
                     const int steps = 20;
                     for (var i = 0; i < steps; ++i) {
