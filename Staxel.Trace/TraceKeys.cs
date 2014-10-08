@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Reflection;
 
 namespace Staxel.Trace {
+    [Obfuscation(Exclude = true)]
     public class TraceKeys {
         static readonly List<TraceKey> Keys = new List<TraceKey>();
 
@@ -34,6 +35,9 @@ namespace Staxel.Trace {
         public static TraceKey SkyBoxRenderer_PreDraw = new TraceKey(Color.DeepSkyBlue);
         public static TraceKey SkyBoxRenderer_PostDraw = new TraceKey(Color.LightSkyBlue);
         public static TraceKey UniverseRenderer_DrawOverlay = new TraceKey(Color.MediumPurple);
+        public static TraceKey Universe_TimeClone = new TraceKey(Color.DarkOrange);
+        public static TraceKey Universe_Deallocate = new TraceKey(Color.DarkKhaki);
+        public static TraceKey WorldRenderer_FetchRenderChunks_FetchChunks = new TraceKey(Color.Orange);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
