@@ -16,5 +16,4 @@ namespace Staxel.Trace {
         public int Id { get; set; }
         public Color Color { get; private set; }
     }
-
 }

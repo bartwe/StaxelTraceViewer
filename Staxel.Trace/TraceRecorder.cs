@@ -9,16 +9,6 @@ using System.Threading;
 
 namespace Staxel.Trace {
     public class TraceRecorder {
-        [StructLayout(LayoutKind.Explicit, Size = 12, Pack = 1)]
-        private struct TraceRecord {
-            [FieldOffset(0)]
-            public int Timestamp;
-            [FieldOffset(4)]
-            public int Thread;
-            [FieldOffset(8)]
-            public int Scope;
-        }
-
         private const int RecordSize = 12; // must match struct Entry's size
         private const int RingSize = 10000000;
         private const int RingFlushSize = 1000000;
@@ -92,11 +82,6 @@ namespace Staxel.Trace {
             }
         }
 
-        private class UnsafeNativeMethods {
-            [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
-            internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
-        }
-
         public static unsafe void Flush(bool hard = false) {
             lock (Locker) {
                 if (_file == null)
@@ -131,22 +116,17 @@ namespace Staxel.Trace {
             }
         }
 
-        private unsafe static TraceRecord[] LoadRaw(string file) {
+        private static unsafe TraceRecord[] LoadRaw(string file) {
             var bytes = File.ReadAllBytes(file);
             var entries = bytes.Length / RecordSize;
             var result = new TraceRecord[entries];
+            if (entries == 0)
+                return result;
             fixed (byte* from = &bytes[0])
             fixed (TraceRecord* to = &result[0]) {
                 UnsafeNativeMethods.MoveMemory(to, from, entries * RecordSize);
             }
             return result;
-        }
-
-        public struct TraceEvent {
-            public int Timestamp;
-            public int Thread;
-            public TraceKey Trace;
-            public bool Enter;
         }
 
         public static TraceEvent[] Load(string file, IEnumerable<TraceKey> keys) {
@@ -155,7 +135,7 @@ namespace Staxel.Trace {
                 keysMap.Add(key.Id, key);
             var entries = LoadRaw(file);
             var result = new TraceEvent[entries.Length];
-            for (int i = 0; i < entries.Length; ++i) {
+            for (var i = 0; i < entries.Length; ++i) {
                 var entry = entries[i];
                 TraceEvent e;
                 e.Timestamp = entry.Timestamp;
@@ -165,6 +145,25 @@ namespace Staxel.Trace {
                 result[i] = e;
             }
             return result;
+        }
+
+        public struct TraceEvent {
+            public bool Enter;
+            public int Thread;
+            public int Timestamp;
+            public TraceKey Trace;
+        }
+
+        [StructLayout(LayoutKind.Explicit, Size = 12, Pack = 1)]
+        private struct TraceRecord {
+            [FieldOffset(0)] public int Timestamp;
+            [FieldOffset(4)] public int Thread;
+            [FieldOffset(8)] public int Scope;
+        }
+
+        private class UnsafeNativeMethods {
+            [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
+            internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
         }
     }
 }

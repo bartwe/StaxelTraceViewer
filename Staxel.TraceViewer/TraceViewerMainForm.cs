@@ -5,15 +5,16 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
 using Staxel.Trace;
 
 namespace Staxel.TraceViewer {
     public partial class TraceViewerMainForm : Form {
-        private Bitmap _screenBuffer;
-        private Bitmap _newScreenBuffer;
-        private bool _updatePending;
+        private Bar[] _bars;
         private TraceRecorder.TraceEvent[] _entries;
+        private Bitmap _newScreenBuffer;
+        private Bitmap _screenBuffer;
+        private bool _updatePending;
+        private bool _updateRequested;
 
         public TraceViewerMainForm() {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
@@ -30,70 +31,55 @@ namespace Staxel.TraceViewer {
                 Close();
         }
 
-        private class Context {
-            public int Offset;
-            public readonly Stack<TraceRecorder.TraceEvent> Stack = new Stack<TraceRecorder.TraceEvent>();
-        }
-
-        private struct Bar {
-            public int Start;
-            public int End;
-            public int Row;
-            public TraceKey Trace;
-            public int ContextOffset;
-        }
-
-        private Bar[] _bars;
-        private bool _updateRequested;
-
         private void LoadFromFile(string file) {
             _entries = TraceRecorder.Load(file, TraceKeys.All());
-            if (_entries.Length == 0)
-                return;
-            OffsetHSB.Minimum = _entries[0].Timestamp;
-            OffsetHSB.Value = _entries[0].Timestamp;
-            OffsetHSB.Maximum = _entries[_entries.Length - 1].Timestamp;
-
             var bars = new List<Bar>();
-            var contexts = new Dictionary<int, Context>();
-            var fetchContext = new Func<int, Context>(threadid => {
-                Context result;
-                if (contexts.TryGetValue(threadid, out result))
-                    return result;
-                result = new Context();
-                result.Offset = contexts.Count;
-                contexts.Add(threadid, result);
-                return result;
-            });
 
-            foreach (var entry in _entries) {
-                var context = fetchContext(entry.Thread);
-                if (entry.Enter) {
-                    context.Stack.Push(entry);
-                }
-                else {
-                    TraceRecorder.TraceEvent start;
-                    while (true) {
-                        if (context.Stack.Count == 0)
-                            goto skip_entry; // unbalanced stack can happen due to clamped history
-                        start = context.Stack.Pop();
-                        if (start.Trace == entry.Trace)
-                            break; // unwind over lost/missing pops
+            if (_entries.Length > 0) {
+                OffsetHSB.Minimum = _entries[0].Timestamp;
+                OffsetHSB.Value = _entries[0].Timestamp;
+                OffsetHSB.Maximum = _entries[_entries.Length - 1].Timestamp;
+
+                var contexts = new Dictionary<int, Context>();
+                var fetchContext = new Func<int, Context>(
+                    threadid => {
+                        Context result;
+                        if (contexts.TryGetValue(threadid, out result))
+                            return result;
+                        result = new Context();
+                        result.Offset = contexts.Count;
+                        contexts.Add(threadid, result);
+                        return result;
+                    });
+
+                foreach (var entry in _entries) {
+                    var context = fetchContext(entry.Thread);
+                    if (entry.Enter) {
+                        context.Stack.Push(entry);
                     }
+                    else {
+                        TraceRecorder.TraceEvent start;
+                        while (true) {
+                            if (context.Stack.Count == 0)
+                                goto skip_entry; // unbalanced stack can happen due to clamped history
+                            start = context.Stack.Pop();
+                            if (start.Trace == entry.Trace)
+                                break; // unwind over lost/missing pops
+                        }
 
-                    Bar bar;
-                    bar.Start = start.Timestamp;
-                    bar.End = entry.Timestamp;
-                    if (bar.Start == bar.End)
-                        bar.End = 1 + bar.End;
-                    bar.Trace = start.Trace;
-                    bar.Row = context.Stack.Count;
-                    bar.ContextOffset = context.Offset;
-                    bars.Add(bar);
+                        Bar bar;
+                        bar.Start = start.Timestamp;
+                        bar.End = entry.Timestamp;
+                        if (bar.Start == bar.End)
+                            bar.End = 1 + bar.End;
+                        bar.Trace = start.Trace;
+                        bar.Row = context.Stack.Count;
+                        bar.ContextOffset = context.Offset;
+                        bars.Add(bar);
+                    }
+                skip_entry: { }
                 }
-            skip_entry: { }
             }
-
             _bars = bars.ToArray();
 
             UpdateBitmap();
@@ -120,7 +106,7 @@ namespace Staxel.TraceViewer {
             const float topOffset = 32.0f;
             const float contextScale = 100.0f;
 
-            OffsetHSB.LargeChange = (int)(((OffsetHSB.Maximum - OffsetHSB.Minimum) / 1000.0) / scaling);
+            OffsetHSB.LargeChange = (int)Math.Min(int.MaxValue, ((OffsetHSB.Maximum - OffsetHSB.Minimum) / 1000.0) / scaling);
             var epoch = (int)(OffsetHSB.Value - _newScreenBuffer.Width / xScale * 0.5);
             var minClamp = epoch;
             var maxClamp = (int)Math.Ceiling(_newScreenBuffer.Width / xScale + epoch);
@@ -129,18 +115,18 @@ namespace Staxel.TraceViewer {
                 using (var g = Graphics.FromImage(_newScreenBuffer)) {
                     g.Clear(Color.LightGray);
 
+                    var renderLines = new Action<double, Pen>(
+                        (interval, pen) => {
+                            var minFrame = (int)Math.Floor(minClamp / interval);
+                            var maxFrame = (int)Math.Ceiling(maxClamp / interval);
 
-                    var renderLines = new Action<double, Pen>((interval, pen) => {
-                        var minFrame = (int)Math.Floor(minClamp / interval);
-                        var maxFrame = (int)Math.Ceiling(maxClamp / interval);
-
-                        if ((maxFrame - minFrame) < 20) {
-                            for (int i = minFrame; i <= maxFrame; ++i) {
-                                var px = (float)((i * interval - epoch) * xScale);
-                                g.DrawLine(pen, px, 0, px, _newScreenBuffer.Height);
+                            if ((maxFrame - minFrame) < 20) {
+                                for (var i = minFrame; i <= maxFrame; ++i) {
+                                    var px = (float)((i * interval - epoch) * xScale);
+                                    g.DrawLine(pen, px, 0, px, _newScreenBuffer.Height);
+                                }
                             }
-                        }
-                    });
+                        });
                     const double fps = 60;
                     const double fpsInterval = 1000000 / fps;
                     const double milliSecondInterval = 1000000 / 1000;
@@ -186,7 +172,7 @@ namespace Staxel.TraceViewer {
             bgWorker.RunWorkerAsync();
         }
 
-        void UpdateBitmapCompleted() {
+        private void UpdateBitmapCompleted() {
             if (InvokeRequired) {
                 BeginInvoke(new MethodInvoker(UpdateBitmapCompleted));
             }
@@ -233,6 +219,19 @@ namespace Staxel.TraceViewer {
                 OffsetHSB.Value = Math.Min(Math.Max(OffsetHSB.Value + OffsetHSB.LargeChange * amount, OffsetHSB.Minimum), OffsetHSB.Maximum);
             }
             UpdateBitmap();
+        }
+
+        private struct Bar {
+            public int ContextOffset;
+            public int End;
+            public int Row;
+            public int Start;
+            public TraceKey Trace;
+        }
+
+        private class Context {
+            public readonly Stack<TraceRecorder.TraceEvent> Stack = new Stack<TraceRecorder.TraceEvent>();
+            public int Offset;
         }
     }
 }
