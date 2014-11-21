@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Staxel.Trace {
     [Obfuscation(Exclude = true)]
     public class TraceKeys {
-        static readonly List<TraceKey> Keys = new List<TraceKey>();
+        private static readonly List<TraceKey> Keys = new List<TraceKey>();
 
         // Hardcoded for now, open to improvement
         public static TraceKey ClientMainLoop_Draw = new TraceKey(Color.LightGreen);
@@ -38,10 +38,29 @@ namespace Staxel.Trace {
         public static TraceKey Universe_TimeClone = new TraceKey(Color.DarkOrange);
         public static TraceKey Universe_Deallocate = new TraceKey(Color.DarkKhaki);
         public static TraceKey WorldRenderer_FetchRenderChunks_FetchChunks = new TraceKey(Color.Orange);
+        public static TraceKey WorldRenderer_FetchRenderChunks_BuildDeltaList = new TraceKey(Color.Red);
+        public static TraceKey Server_Update = new TraceKey(Color.DeepSkyBlue);
+        public static TraceKey LodServer_Update = new TraceKey(Color.Orange);
+        public static TraceKey Server_RequestReload = new TraceKey(Color.Red);
+        public static TraceKey Server_Update_Packets = new TraceKey(Color.LawnGreen);
+        public static TraceKey Server_Update_ConnectionsClosed = new TraceKey(Color.Blue);
+        public static TraceKey Server_Update_Multiverse = new TraceKey(Color.LightGreen);
+        public static TraceKey Server_Update_Connections = new TraceKey(Color.White);
+        public static TraceKey ClientServerChunkManager_Update = new TraceKey(Color.Brown);
+        public static TraceKey LodViewController_Update = new TraceKey(Color.MediumPurple);
+        public static TraceKey ClientServerChunkManager_ProcessPackets = new TraceKey(Color.Blue);
+        public static TraceKey LodViewController_SetPosition = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey LivingWorld_Update = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey Entities_Update = new TraceKey(Color.Blue);
+        public static TraceKey World_Update = new TraceKey(Color.White);
+        public static TraceKey Universe_Update_Packets = new TraceKey(Color.LawnGreen);
+        public static TraceKey EntityPhysics_Update = new TraceKey(Color.Yellow);
+        public static TraceKey PlayerEntityLogic_Update = new TraceKey(Color.Tomato);
+        public static TraceKey ItemEntityLogic_Update = new TraceKey(Color.Red);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
-            int id = 1;
+            var id = 1;
             foreach (var key in props) {
                 var scope = (TraceKey)key.GetValue(null);
                 scope.Code = key.Name;
