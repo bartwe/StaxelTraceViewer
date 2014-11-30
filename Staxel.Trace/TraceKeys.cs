@@ -57,6 +57,9 @@ namespace Staxel.Trace {
         public static TraceKey EntityPhysics_Update = new TraceKey(Color.Yellow);
         public static TraceKey PlayerEntityLogic_Update = new TraceKey(Color.Tomato);
         public static TraceKey ItemEntityLogic_Update = new TraceKey(Color.Red);
+        public static TraceKey PlayerEntityLogic_Update_TerrainRayIntersect = new TraceKey(Color.MediumPurple);
+        public static TraceKey PlayerEntityLogic_Update_Camera = new TraceKey(Color.White);
+        public static TraceKey EntityUniverseFacade_InnerTerrainRayIntersect_ReadTiles = new TraceKey(Color.Brown);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
