@@ -15,8 +15,8 @@ namespace Staxel.Trace {
         private const int WriteBufferSize = 64 * 1024;
 
         private static readonly TraceRecord[] RingBuffer = new TraceRecord[RingSize];
-        private static readonly object Locker = new object();
         private static readonly byte[] WriteBuffer = new byte[WriteBufferSize];
+        private static SpinLock _lock = new SpinLock();
 
         private static int _ringTail;
         private static int _ringHead;
@@ -25,21 +25,24 @@ namespace Staxel.Trace {
         private static long _tickRation;
 
         public static void Start() {
-            lock (Locker) {
-                _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
-                _epoch = Stopwatch.GetTimestamp();
-                _tickRation = 1073741824000000L / Stopwatch.Frequency;
-            }
+            bool lockTaken = false;
+            _lock.Enter(ref lockTaken);
+            _epoch = Stopwatch.GetTimestamp();
+            _tickRation = 1073741824000000L / Stopwatch.Frequency;
+            _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
+
+            _lock.Exit();
         }
 
         public static void Stop() {
-            lock (Locker) {
-                if (_file == null)
-                    return;
-                Flush(true);
+            Flush(true);
+            bool lockTaken = false;
+            _lock.Enter(ref lockTaken);
+            if (_file != null) {
                 _file.Close();
                 _file = null;
             }
+            _lock.Exit();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,16 +53,17 @@ namespace Staxel.Trace {
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
             traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
             traceRecord.Scope = (trace.Id << 1) | 1;
-            lock (Locker) {
-                RingBuffer[_ringHead++] = traceRecord;
-                if (_ringHead == RingSize)
-                    _ringHead = 0;
-                if (_ringTail == _ringHead) {
-                    _ringTail++;
-                    if (_ringTail > RingSize)
-                        _ringTail = 0;
-                }
+            bool lockTaken = false;
+            _lock.Enter(ref lockTaken);
+            RingBuffer[_ringHead++] = traceRecord;
+            if (_ringHead == RingSize)
+                _ringHead = 0;
+            if (_ringTail == _ringHead) {
+                _ringTail++;
+                if (_ringTail > RingSize)
+                    _ringTail = 0;
             }
+            _lock.Exit();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -70,50 +74,52 @@ namespace Staxel.Trace {
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
             traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
             traceRecord.Scope = (trace.Id << 1) | 0;
-            lock (Locker) {
-                RingBuffer[_ringHead++] = traceRecord;
-                if (_ringHead == RingSize)
-                    _ringHead = 0;
-                if (_ringTail == _ringHead) {
-                    _ringTail++;
-                    if (_ringTail > RingSize)
-                        _ringTail = 0;
-                }
+            bool lockTaken = false;
+            _lock.Enter(ref lockTaken);
+            RingBuffer[_ringHead++] = traceRecord;
+            if (_ringHead == RingSize)
+                _ringHead = 0;
+            if (_ringTail == _ringHead) {
+                _ringTail++;
+                if (_ringTail > RingSize)
+                    _ringTail = 0;
             }
+            _lock.Exit();
         }
 
         public static unsafe void Flush(bool hard = false) {
-            lock (Locker) {
-                if (_file == null)
-                    return;
-                var entries = _ringHead - _ringTail;
-                if (entries < 0)
-                    entries += RingSize;
-                var flush = hard | (entries >= RingFlushSize);
-                if (flush) {
-                    while (_ringHead != _ringTail) {
-                        var limit = _ringHead;
-                        if (limit < _ringTail)
-                            limit = RingSize;
-                        var length = limit - _ringTail;
-                        if (length > WriteBuffer.Length / RecordSize)
-                            length = WriteBuffer.Length / RecordSize;
-                        var bytes = length * RecordSize;
-                        {
-                            fixed (TraceRecord* from = &RingBuffer[_ringTail])
-                            fixed (byte* to = &WriteBuffer[0]) {
-                                UnsafeNativeMethods.MoveMemory(to, from, bytes);
-                            }
+            if (_file == null)
+                return;
+            bool lockTaken = false;
+            _lock.Enter(ref lockTaken);
+            var entries = _ringHead - _ringTail;
+            if (entries < 0)
+                entries += RingSize;
+            var flush = hard | (entries >= RingFlushSize);
+            if (flush) {
+                while (_ringHead != _ringTail) {
+                    var limit = _ringHead;
+                    if (limit < _ringTail)
+                        limit = RingSize;
+                    var length = limit - _ringTail;
+                    if (length > WriteBuffer.Length / RecordSize)
+                        length = WriteBuffer.Length / RecordSize;
+                    var bytes = length * RecordSize;
+                    {
+                        fixed (TraceRecord* from = &RingBuffer[_ringTail])
+                        fixed (byte* to = &WriteBuffer[0]) {
+                            UnsafeNativeMethods.MoveMemory(to, from, bytes);
                         }
-                        _file.Write(WriteBuffer, 0, bytes);
-                        _ringTail += length;
-                        if (_ringTail == RingSize)
-                            _ringTail = 0;
                     }
-                    if (hard)
-                        _file.Flush();
+                    _file.Write(WriteBuffer, 0, bytes);
+                    _ringTail += length;
+                    if (_ringTail == RingSize)
+                        _ringTail = 0;
                 }
+                if (hard)
+                    _file.Flush();
             }
+            _lock.Exit();
         }
 
         private static unsafe TraceRecord[] LoadRaw(string file) {
@@ -156,9 +162,12 @@ namespace Staxel.Trace {
 
         [StructLayout(LayoutKind.Explicit, Size = 12, Pack = 1)]
         private struct TraceRecord {
-            [FieldOffset(0)] public int Timestamp;
-            [FieldOffset(4)] public int Thread;
-            [FieldOffset(8)] public int Scope;
+            [FieldOffset(0)]
+            public int Timestamp;
+            [FieldOffset(4)]
+            public int Thread;
+            [FieldOffset(8)]
+            public int Scope;
         }
 
         private class UnsafeNativeMethods {

@@ -77,7 +77,7 @@ namespace Staxel.TraceViewer {
                         bar.ContextOffset = context.Offset;
                         bars.Add(bar);
                     }
-                skip_entry: { }
+                    skip_entry: {}
                 }
             }
             _bars = bars.ToArray();
