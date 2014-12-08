@@ -15,6 +15,7 @@ namespace Staxel.TraceViewer {
         private Bitmap _screenBuffer;
         private bool _updatePending;
         private bool _updateRequested;
+        private bool _filter;
 
         public TraceViewerMainForm() {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
@@ -75,12 +76,22 @@ namespace Staxel.TraceViewer {
                         bar.Trace = start.Trace;
                         bar.Row = context.Stack.Count;
                         bar.ContextOffset = context.Offset;
+                        bar.Filtered = false;
                         bars.Add(bar);
                     }
-                    skip_entry: {}
+                skip_entry: { }
                 }
             }
             _bars = bars.ToArray();
+
+            bool filtered = false;
+            for (int i = _bars.Length - 1; i >= 0; i--) {
+                var bar = _bars[i];
+                if (bar.Row == 0)
+                    filtered = (bar.End - bar.Start) <= 16000;
+                bar.Filtered = filtered;
+                _bars[i] = bar;
+            }
 
             UpdateBitmap();
         }
@@ -144,9 +155,11 @@ namespace Staxel.TraceViewer {
                         var ts = (int)(px / xScale + epoch);
                         g.DrawString(ts.ToString(CultureInfo.InvariantCulture), DefaultFont, new SolidBrush(Color.Black), px, 0.0f);
                     }
-
                     for (var i = 0; i < _bars.Length; ++i) {
                         var bar = _bars[i];
+
+                        if (_filter && bar.Filtered)
+                            continue;
                         if (bar.End < minClamp)
                             continue;
                         if (bar.Start > maxClamp)
@@ -157,6 +170,7 @@ namespace Staxel.TraceViewer {
                         var width = ex - x;
                         if (width < 0.01)
                             continue;
+
                         var y = topOffset + bar.Row * stackScale * yScale + bar.ContextOffset * contextScale * yScale;
                         if (width < 1.0)
                             width = 1.0f;
@@ -227,11 +241,17 @@ namespace Staxel.TraceViewer {
             public int Row;
             public int Start;
             public TraceKey Trace;
+            public bool Filtered;
         }
 
         private class Context {
             public readonly Stack<TraceRecorder.TraceEvent> Stack = new Stack<TraceRecorder.TraceEvent>();
             public int Offset;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e) {
+            _filter = checkBox1.Checked;
+            UpdateBitmap();
         }
     }
 }

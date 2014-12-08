@@ -140,8 +140,17 @@ namespace Staxel.Trace {
             foreach (var key in keys)
                 keysMap.Add(key.Id, key);
             var entries = LoadRaw(file);
-            var result = new TraceEvent[entries.Length];
+            long prevTimestamp = 0;
+            int entriesLimit = 0;
             for (var i = 0; i < entries.Length; ++i) {
+                var entry = entries[i];
+                if (entry.Timestamp < prevTimestamp)
+                    break; // overflow/loop around
+                prevTimestamp = entry.Timestamp;
+                entriesLimit++;
+            }
+            var result = new TraceEvent[entriesLimit];
+            for (var i = 0; i < entriesLimit; ++i) {
                 var entry = entries[i];
                 TraceEvent e;
                 e.Timestamp = entry.Timestamp;

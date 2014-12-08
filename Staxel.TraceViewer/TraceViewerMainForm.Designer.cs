@@ -26,6 +26,7 @@
             this.StaxelTraceOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.ZoomHSB = new System.Windows.Forms.HScrollBar();
             this.OffsetHSB = new System.Windows.Forms.HScrollBar();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // StaxelTraceOpenFileDialog
@@ -57,11 +58,24 @@
             this.OffsetHSB.TabIndex = 1;
             this.OffsetHSB.Scroll += new System.Windows.Forms.ScrollEventHandler(this.OffsetHSB_Scroll);
             // 
+            // checkBox1
+            // 
+            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(1440, 41);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(45, 17);
+            this.checkBox1.TabIndex = 2;
+            this.checkBox1.Text = "filter";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // TraceViewerMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1497, 853);
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.OffsetHSB);
             this.Controls.Add(this.ZoomHSB);
             this.Name = "TraceViewerMainForm";
@@ -70,6 +84,7 @@
             this.SizeChanged += new System.EventHandler(this.TraceViewerMainForm_SizeChanged);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.TraceViewerMainForm_Paint);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -78,6 +93,7 @@
         private System.Windows.Forms.OpenFileDialog StaxelTraceOpenFileDialog;
         private System.Windows.Forms.HScrollBar ZoomHSB;
         private System.Windows.Forms.HScrollBar OffsetHSB;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 
