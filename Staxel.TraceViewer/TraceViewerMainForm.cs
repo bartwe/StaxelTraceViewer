@@ -1,13 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Staxel.Trace;
 
 namespace Staxel.TraceViewer {
+
+    public static class Extensions {
+        public static IEnumerable<T> Sorted<T>(this IEnumerable<T> self, Comparison<T> comparator) {
+            var temp = self.ToList();
+            temp.Sort(comparator);
+            return temp;
+        }
+    }
+
     public partial class TraceViewerMainForm : Form {
         private Bar[] _bars;
         private TraceRecorder.TraceEvent[] _entries;
@@ -76,7 +88,8 @@ namespace Staxel.TraceViewer {
                         bar.Trace = start.Trace;
                         bar.Row = context.Stack.Count;
                         bar.ContextOffset = context.Offset;
-                        bar.Filtered = false;
+                        bar.LateFrame = false;
+                        bar.HorribleFrame = false;
                         bars.Add(bar);
                     }
                 skip_entry: { }
@@ -84,16 +97,110 @@ namespace Staxel.TraceViewer {
             }
             _bars = bars.ToArray();
 
-            bool filtered = false;
+            bool lateFrame = false;
+            bool horribleFrame = false;
             for (int i = _bars.Length - 1; i >= 0; i--) {
                 var bar = _bars[i];
-                if (bar.Row == 0)
-                    filtered = (bar.End - bar.Start) <= 16000;
-                bar.Filtered = filtered;
+                if (bar.Row == 0) {
+                    lateFrame = (bar.End - bar.Start) > 16000;
+                    horribleFrame = (bar.End - bar.Start) > 100000;
+                }
+                bar.LateFrame = lateFrame;
+                bar.HorribleFrame = horribleFrame;
                 _bars[i] = bar;
             }
 
+            var highId = TraceKeys.All().Aggregate((a, b) => (a.Id > b.Id) ? a : b).Id;
+
+            var sums = new Sum[highId + 1];
+
+            foreach (var key in TraceKeys.All()) {
+                var sum = new Sum();
+                sum.Key = key;
+                sums[key.Id] = sum;
+            }
+
+
+            var _innerDuration = new Counter[256];
+            for (int i = 0; i < _innerDuration.Length; ++i)
+                _innerDuration[i] = new Counter();
+            for (int i = 0; i < _bars.Length; i++) {
+                var bar = _bars[i];
+
+                var innerDuration = _innerDuration[bar.Row].Value;
+
+                var duration = bar.End - bar.Start;
+                var sum = sums[bar.Trace.Id];
+                sum.Inclusive += duration;
+                sum.Exclusive += duration - innerDuration;
+                sum.Calls++;
+
+                if (bar.LateFrame) {
+                    sum.InclusiveLate += duration;
+                    sum.ExclusiveLate += duration - innerDuration;
+                    sum.CallsLate++;
+                }
+
+                if (bar.HorribleFrame) {
+                    sum.InclusiveHorrible+= duration;
+                    sum.ExclusiveHorrible += duration - innerDuration;
+                    sum.CallsHorrible++;
+                }
+
+                for (var j = 0; j < bar.Row; ++j)
+                    _innerDuration[j].Value += duration;
+                for (var j = bar.Row; j < _innerDuration.Length; ++j)
+                    _innerDuration[j].Value = 0;
+            }
+
+            var filteredSums = sums.Where((x) => x != null).ToArray();
+
+            Console.WriteLine();
+            Console.WriteLine("Inclusive: ");
+            foreach (var top10 in filteredSums.Sorted((a, b) => -a.Inclusive.CompareTo(b.Inclusive)).Take(10))
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.Inclusive.ToString().PadRight(12) + " \\ " + top10.Calls);
+            Console.WriteLine();
+            Console.WriteLine("Exclusive: ");
+            foreach (var top10 in filteredSums.Sorted((a, b) => -a.Exclusive.CompareTo(b.Exclusive)).Take(10))
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.Exclusive.ToString().PadRight(12) + " \\ " + top10.Calls);
+
+            Console.WriteLine();
+            Console.WriteLine("InclusiveLate: ");
+            foreach (var top10 in filteredSums.Sorted((a, b) => -a.InclusiveLate.CompareTo(b.InclusiveLate)).Take(10))
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.InclusiveLate.ToString().PadRight(12) + " \\ " + top10.CallsLate);
+            Console.WriteLine();
+            Console.WriteLine("ExclusiveLate: ");
+            foreach (var top10 in filteredSums.Sorted((a, b) => -a.ExclusiveLate.CompareTo(b.ExclusiveLate)).Take(10))
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveLate.ToString().PadRight(12)+" \\ "+top10.CallsLate);
+
+
+            Console.WriteLine();
+            Console.WriteLine("InclusiveHorrible: ");
+            foreach (var top10 in filteredSums.Sorted((a, b) => -a.InclusiveHorrible.CompareTo(b.InclusiveHorrible)).Take(10))
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.InclusiveHorrible.ToString().PadRight(12) + " \\ " + top10.CallsHorrible);
+            Console.WriteLine();
+            Console.WriteLine("ExclusiveHorrible: ");
+            foreach (var top10 in filteredSums.Sorted((a, b) => -a.ExclusiveHorrible.CompareTo(b.ExclusiveHorrible)).Take(10))
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveHorrible.ToString().PadRight(12) + " \\ " + top10.CallsHorrible);
+
             UpdateBitmap();
+        }
+
+        private class Counter {
+            public long Value;
+        }
+
+        private class Sum {
+            public TraceKey Key;
+            public long Inclusive;
+            public long Exclusive;
+            public long Calls;
+            public long InclusiveLate;
+            public long ExclusiveLate;
+            public long CallsLate;
+            public long InclusiveHorrible;
+            public long ExclusiveHorrible;
+            public long CallsHorrible;
         }
 
         private void UpdateBitmap() {
@@ -158,7 +265,7 @@ namespace Staxel.TraceViewer {
                     for (var i = 0; i < _bars.Length; ++i) {
                         var bar = _bars[i];
 
-                        if (_filter && bar.Filtered)
+                        if (_filter && !bar.LateFrame)
                             continue;
                         if (bar.End < minClamp)
                             continue;
@@ -241,7 +348,8 @@ namespace Staxel.TraceViewer {
             public int Row;
             public int Start;
             public TraceKey Trace;
-            public bool Filtered;
+            public bool LateFrame;
+            public bool HorribleFrame;
         }
 
         private class Context {
