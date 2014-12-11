@@ -92,34 +92,38 @@ namespace Staxel.Trace {
                 return;
             bool lockTaken = false;
             _lock.Enter(ref lockTaken);
-            var entries = _ringHead - _ringTail;
-            if (entries < 0)
-                entries += RingSize;
-            var flush = hard | (entries >= RingFlushSize);
-            if (flush) {
-                while (_ringHead != _ringTail) {
-                    var limit = _ringHead;
-                    if (limit < _ringTail)
-                        limit = RingSize;
-                    var length = limit - _ringTail;
-                    if (length > WriteBuffer.Length / RecordSize)
-                        length = WriteBuffer.Length / RecordSize;
-                    var bytes = length * RecordSize;
-                    {
-                        fixed (TraceRecord* from = &RingBuffer[_ringTail])
-                        fixed (byte* to = &WriteBuffer[0]) {
-                            UnsafeNativeMethods.MoveMemory(to, from, bytes);
+            try {
+                var entries = _ringHead - _ringTail;
+                if (entries < 0)
+                    entries += RingSize;
+                var flush = hard | (entries >= RingFlushSize);
+                if (flush) {
+                    while (_ringHead != _ringTail) {
+                        var limit = _ringHead;
+                        if (limit < _ringTail)
+                            limit = RingSize;
+                        var length = limit - _ringTail;
+                        if (length > WriteBuffer.Length / RecordSize)
+                            length = WriteBuffer.Length / RecordSize;
+                        var bytes = length * RecordSize;
+                        {
+                            fixed (TraceRecord* from = &RingBuffer[_ringTail])
+                            fixed (byte* to = &WriteBuffer[0]) {
+                                UnsafeNativeMethods.MoveMemory(to, from, bytes);
+                            }
                         }
+                        _file.Write(WriteBuffer, 0, bytes);
+                        _ringTail += length;
+                        if (_ringTail == RingSize)
+                            _ringTail = 0;
                     }
-                    _file.Write(WriteBuffer, 0, bytes);
-                    _ringTail += length;
-                    if (_ringTail == RingSize)
-                        _ringTail = 0;
+                    if (hard)
+                        _file.Flush();
                 }
-                if (hard)
-                    _file.Flush();
             }
-            _lock.Exit();
+            finally {
+                _lock.Exit();
+            }
         }
 
         private static unsafe TraceRecord[] LoadRaw(string file) {
