@@ -60,6 +60,11 @@ namespace Staxel.Trace {
         public static TraceKey PlayerEntityLogic_Update_TerrainRayIntersect = new TraceKey(Color.MediumPurple);
         public static TraceKey PlayerEntityLogic_Update_Camera = new TraceKey(Color.White);
         public static TraceKey EntityUniverseFacade_InnerTerrainRayIntersect_ReadTiles = new TraceKey(Color.Brown);
+        public static TraceKey Multiverse_Update_Bedrock = new TraceKey(Color.DarkKhaki);
+        public static TraceKey Multiverse_Update_Catchup = new TraceKey(Color.Red);
+        public static TraceKey Multiverse_Update_Previous = new TraceKey(Color.SaddleBrown);
+        public static TraceKey Multiverse_Update_Next = new TraceKey(Color.SkyBlue);
+        public static TraceKey LodClient_Draw = new TraceKey(Color.GreenYellow);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
