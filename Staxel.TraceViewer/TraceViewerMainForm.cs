@@ -1,25 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Staxel.Trace;
+using Staxel.Base;
 
 namespace Staxel.TraceViewer {
-
-    public static class Extensions {
-        public static IEnumerable<T> Sorted<T>(this IEnumerable<T> self, Comparison<T> comparator) {
-            var temp = self.ToList();
-            temp.Sort(comparator);
-            return temp;
-        }
-    }
-
     public partial class TraceViewerMainForm : Form {
         private Bar[] _bars;
         private TraceRecorder.TraceEvent[] _entries;
