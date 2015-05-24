@@ -76,9 +76,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Staxel\Staxel.Base\Staxel.Base.csproj">
-      <Project>{5535c452-f4e0-4f0e-b86c-4605ec79b609}</Project>
-      <Name>Staxel.Base</Name>
+    <ProjectReference Include="..\..\Plukit.Base\Plukit.Base.csproj">
+      <Project>{62D0F489-1234-477C-92D0-692B2539DFC9}</Project>
+      <Name>Plukit.Base</Name>
     </ProjectReference>
     <ProjectReference Include="..\Staxel.Trace\Staxel.Trace.csproj">
       <Project>{2e35e2c5-8078-4eb4-99c1-4f1da5df5891}</Project>

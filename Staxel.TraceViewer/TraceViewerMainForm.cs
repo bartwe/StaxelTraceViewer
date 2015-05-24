@@ -6,8 +6,8 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using Plukit.Base;
 using Staxel.Trace;
-using Staxel.Base;
 
 namespace Staxel.TraceViewer {
     public partial class TraceViewerMainForm : Form {
