@@ -5,8 +5,7 @@ using System.Reflection;
 namespace Staxel.Trace {
     [Obfuscation(Exclude = true)]
     public class TraceKeys {
-        private static readonly List<TraceKey> Keys = new List<TraceKey>();
-
+        static readonly List<TraceKey> Keys = new List<TraceKey>();
         // Hardcoded for now, open to improvement
         public static TraceKey ClientMainLoop_Draw = new TraceKey(Color.LightGreen);
         public static TraceKey Multiverse_Update = new TraceKey(Color.Purple);

@@ -9,23 +9,19 @@ using System.Threading;
 
 namespace Staxel.Trace {
     public class TraceRecorder {
-        private const int RecordSize = 12; // must match struct Entry's size
-        private const int RingSize = 10000000;
-        private const int RingFlushSize = 1000000;
-        private const int WriteBufferSize = 64 * 1024;
-
-        private static readonly TraceRecord[] RingBuffer = new TraceRecord[RingSize];
-        private static readonly byte[] WriteBuffer = new byte[WriteBufferSize];
-        private static SpinLock _lock = new SpinLock();
-
-        private static int _ringTail;
-        private static int _ringHead;
-        private static FileStream _file;
-        private static long _epoch;
-        private static long _tickRation;
+        const int RecordSize = 12; // must match struct Entry's size
+        const int RingSize = 10000000;
+        const int RingFlushSize = 1000000;
+        const int WriteBufferSize = 64 * 1024;
+        static SpinLock _lock = new SpinLock();
+        static int _ringTail;
+        static int _ringHead;
+        static FileStream _file;
+        static long _epoch;
+        static long _tickRation;
 
         public static void Start() {
-            bool lockTaken = false;
+            var lockTaken = false;
             _lock.Enter(ref lockTaken);
             _epoch = Stopwatch.GetTimestamp();
             _tickRation = 1073741824000000L / Stopwatch.Frequency;
@@ -36,7 +32,7 @@ namespace Staxel.Trace {
 
         public static void Stop() {
             Flush(true);
-            bool lockTaken = false;
+            var lockTaken = false;
             _lock.Enter(ref lockTaken);
             if (_file != null) {
                 _file.Close();
@@ -53,7 +49,7 @@ namespace Staxel.Trace {
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
             traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
             traceRecord.Scope = (trace.Id << 1) | 1;
-            bool lockTaken = false;
+            var lockTaken = false;
             _lock.Enter(ref lockTaken);
             RingBuffer[_ringHead++] = traceRecord;
             if (_ringHead == RingSize)
@@ -74,7 +70,7 @@ namespace Staxel.Trace {
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
             traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
             traceRecord.Scope = (trace.Id << 1) | 0;
-            bool lockTaken = false;
+            var lockTaken = false;
             _lock.Enter(ref lockTaken);
             RingBuffer[_ringHead++] = traceRecord;
             if (_ringHead == RingSize)
@@ -90,7 +86,7 @@ namespace Staxel.Trace {
         public static unsafe void Flush(bool hard = false) {
             if (_file == null)
                 return;
-            bool lockTaken = false;
+            var lockTaken = false;
             _lock.Enter(ref lockTaken);
             try {
                 var entries = _ringHead - _ringTail;
@@ -126,7 +122,7 @@ namespace Staxel.Trace {
             }
         }
 
-        private static unsafe TraceRecord[] LoadRaw(string file) {
+        static unsafe TraceRecord[] LoadRaw(string file) {
             var bytes = File.ReadAllBytes(file);
             var entries = bytes.Length / RecordSize;
             var result = new TraceRecord[entries];
@@ -145,7 +141,7 @@ namespace Staxel.Trace {
                 keysMap.Add(key.Id, key);
             var entries = LoadRaw(file);
             long prevTimestamp = 0;
-            int entriesLimit = 0;
+            var entriesLimit = 0;
             for (var i = 0; i < entries.Length; ++i) {
                 var entry = entries[i];
                 if (entry.Timestamp < prevTimestamp)
@@ -174,18 +170,18 @@ namespace Staxel.Trace {
         }
 
         [StructLayout(LayoutKind.Explicit, Size = 12, Pack = 1)]
-        private struct TraceRecord {
-            [FieldOffset(0)]
-            public int Timestamp;
-            [FieldOffset(4)]
-            public int Thread;
-            [FieldOffset(8)]
-            public int Scope;
+        struct TraceRecord {
+            [FieldOffset(0)] public int Timestamp;
+            [FieldOffset(4)] public int Thread;
+            [FieldOffset(8)] public int Scope;
         }
 
-        private class UnsafeNativeMethods {
+        class UnsafeNativeMethods {
             [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
             internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
         }
+
+        static readonly TraceRecord[] RingBuffer = new TraceRecord[RingSize];
+        static readonly byte[] WriteBuffer = new byte[WriteBufferSize];
     }
 }

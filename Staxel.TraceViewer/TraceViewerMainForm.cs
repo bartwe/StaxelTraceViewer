@@ -11,13 +11,13 @@ using Staxel.Trace;
 
 namespace Staxel.TraceViewer {
     public partial class TraceViewerMainForm : Form {
-        private Bar[] _bars;
-        private TraceRecorder.TraceEvent[] _entries;
-        private Bitmap _newScreenBuffer;
-        private Bitmap _screenBuffer;
-        private bool _updatePending;
-        private bool _updateRequested;
-        private bool _filter;
+        Bar[] _bars;
+        TraceRecorder.TraceEvent[] _entries;
+        Bitmap _newScreenBuffer;
+        Bitmap _screenBuffer;
+        bool _updatePending;
+        bool _updateRequested;
+        bool _filter;
 
         public TraceViewerMainForm() {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
@@ -25,7 +25,7 @@ namespace Staxel.TraceViewer {
             MouseWheel += TraceViewerMainForm_MouseWheel;
         }
 
-        private void TraceViewerMainForm_Load(object sender, EventArgs e) {
+        void TraceViewerMainForm_Load(object sender, EventArgs e) {
             if (StaxelTraceOpenFileDialog.ShowDialog() == DialogResult.OK) {
                 LoadFromFile(StaxelTraceOpenFileDialog.FileName);
                 BringToFront();
@@ -34,7 +34,7 @@ namespace Staxel.TraceViewer {
                 Close();
         }
 
-        private void LoadFromFile(string file) {
+        void LoadFromFile(string file) {
             _entries = TraceRecorder.Load(file, TraceKeys.All());
             var bars = new List<Bar>();
 
@@ -82,14 +82,14 @@ namespace Staxel.TraceViewer {
                         bar.HorribleFrame = false;
                         bars.Add(bar);
                     }
-                skip_entry: { }
+                    skip_entry: {}
                 }
             }
             _bars = bars.ToArray();
 
-            bool lateFrame = false;
-            bool horribleFrame = false;
-            for (int i = _bars.Length - 1; i >= 0; i--) {
+            var lateFrame = false;
+            var horribleFrame = false;
+            for (var i = _bars.Length - 1; i >= 0; i--) {
                 var bar = _bars[i];
                 if (bar.Row == 0) {
                     lateFrame = (bar.End - bar.Start) > 16000;
@@ -112,9 +112,9 @@ namespace Staxel.TraceViewer {
 
 
             var _innerDuration = new Counter[256];
-            for (int i = 0; i < _innerDuration.Length; ++i)
+            for (var i = 0; i < _innerDuration.Length; ++i)
                 _innerDuration[i] = new Counter();
-            for (int i = 0; i < _bars.Length; i++) {
+            for (var i = 0; i < _bars.Length; i++) {
                 var bar = _bars[i];
 
                 var innerDuration = _innerDuration[bar.Row].Value;
@@ -132,7 +132,7 @@ namespace Staxel.TraceViewer {
                 }
 
                 if (bar.HorribleFrame) {
-                    sum.InclusiveHorrible+= duration;
+                    sum.InclusiveHorrible += duration;
                     sum.ExclusiveHorrible += duration - innerDuration;
                     sum.CallsHorrible++;
                 }
@@ -143,7 +143,7 @@ namespace Staxel.TraceViewer {
                     _innerDuration[j].Value = 0;
             }
 
-            var filteredSums = sums.Where((x) => x != null).ToArray();
+            var filteredSums = sums.Where(x => x != null).ToArray();
 
             Console.WriteLine();
             Console.WriteLine("Inclusive: ");
@@ -161,7 +161,7 @@ namespace Staxel.TraceViewer {
             Console.WriteLine();
             Console.WriteLine("ExclusiveLate: ");
             foreach (var top10 in filteredSums.Sorted((a, b) => -a.ExclusiveLate.CompareTo(b.ExclusiveLate)).Take(10))
-                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveLate.ToString().PadRight(12)+" \\ "+top10.CallsLate);
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveLate.ToString().PadRight(12) + " \\ " + top10.CallsLate);
 
 
             Console.WriteLine();
@@ -176,24 +176,7 @@ namespace Staxel.TraceViewer {
             UpdateBitmap();
         }
 
-        private class Counter {
-            public long Value;
-        }
-
-        private class Sum {
-            public TraceKey Key;
-            public long Inclusive;
-            public long Exclusive;
-            public long Calls;
-            public long InclusiveLate;
-            public long ExclusiveLate;
-            public long CallsLate;
-            public long InclusiveHorrible;
-            public long ExclusiveHorrible;
-            public long CallsHorrible;
-        }
-
-        private void UpdateBitmap() {
+        void UpdateBitmap() {
             if (_updatePending) {
                 _updateRequested = true;
                 return;
@@ -283,7 +266,7 @@ namespace Staxel.TraceViewer {
             bgWorker.RunWorkerAsync();
         }
 
-        private void UpdateBitmapCompleted() {
+        void UpdateBitmapCompleted() {
             if (InvokeRequired) {
                 BeginInvoke(new MethodInvoker(UpdateBitmapCompleted));
             }
@@ -300,20 +283,20 @@ namespace Staxel.TraceViewer {
             }
         }
 
-        private void TraceViewerMainForm_Paint(object sender, PaintEventArgs e) {
+        void TraceViewerMainForm_Paint(object sender, PaintEventArgs e) {
             if (_screenBuffer != null)
                 e.Graphics.DrawImage(_screenBuffer, 0, 40);
         }
 
-        private void ZoomHSB_Scroll(object sender, ScrollEventArgs e) {
+        void ZoomHSB_Scroll(object sender, ScrollEventArgs e) {
             UpdateBitmap();
         }
 
-        private void OffsetHSB_Scroll(object sender, ScrollEventArgs e) {
+        void OffsetHSB_Scroll(object sender, ScrollEventArgs e) {
             UpdateBitmap();
         }
 
-        private void TraceViewerMainForm_SizeChanged(object sender, EventArgs e) {
+        void TraceViewerMainForm_SizeChanged(object sender, EventArgs e) {
             if (_screenBuffer != null) {
                 _screenBuffer.Dispose();
                 _screenBuffer = null;
@@ -321,7 +304,7 @@ namespace Staxel.TraceViewer {
             UpdateBitmap();
         }
 
-        private void TraceViewerMainForm_MouseWheel(object sender, MouseEventArgs e) {
+        void TraceViewerMainForm_MouseWheel(object sender, MouseEventArgs e) {
             var amount = e.Delta / 120;
             if ((ModifierKeys & Keys.Shift) != 0) {
                 ZoomHSB.Value = Math.Min(Math.Max(ZoomHSB.Value + ZoomHSB.LargeChange * amount, ZoomHSB.Minimum), ZoomHSB.Maximum);
@@ -332,7 +315,29 @@ namespace Staxel.TraceViewer {
             UpdateBitmap();
         }
 
-        private struct Bar {
+        void checkBox1_CheckedChanged(object sender, EventArgs e) {
+            _filter = checkBox1.Checked;
+            UpdateBitmap();
+        }
+
+        class Counter {
+            public long Value;
+        }
+
+        class Sum {
+            public TraceKey Key;
+            public long Inclusive;
+            public long Exclusive;
+            public long Calls;
+            public long InclusiveLate;
+            public long ExclusiveLate;
+            public long CallsLate;
+            public long InclusiveHorrible;
+            public long ExclusiveHorrible;
+            public long CallsHorrible;
+        }
+
+        struct Bar {
             public int ContextOffset;
             public int End;
             public int Row;
@@ -342,14 +347,9 @@ namespace Staxel.TraceViewer {
             public bool HorribleFrame;
         }
 
-        private class Context {
+        class Context {
             public readonly Stack<TraceRecorder.TraceEvent> Stack = new Stack<TraceRecorder.TraceEvent>();
             public int Offset;
-        }
-
-        private void checkBox1_CheckedChanged(object sender, EventArgs e) {
-            _filter = checkBox1.Checked;
-            UpdateBitmap();
         }
     }
 }
