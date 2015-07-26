@@ -20,6 +20,7 @@ namespace Staxel.Trace {
         static long _epoch;
         static long _tickRation;
 
+        [Conditional("TRACE")]
         public static void Start() {
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
@@ -30,6 +31,7 @@ namespace Staxel.Trace {
             _lock.Exit();
         }
 
+        [Conditional("TRACE")]
         public static void Stop() {
             Flush(true);
             var lockTaken = false;
@@ -41,6 +43,7 @@ namespace Staxel.Trace {
             _lock.Exit();
         }
 
+        [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Enter(TraceKey trace) {
             if (_file == null)
@@ -62,6 +65,7 @@ namespace Staxel.Trace {
             _lock.Exit();
         }
 
+        [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Leave(TraceKey trace) {
             if (_file == null)
@@ -83,6 +87,7 @@ namespace Staxel.Trace {
             _lock.Exit();
         }
 
+        [Conditional("TRACE")]
         public static unsafe void Flush(bool hard = false) {
             if (_file == null)
                 return;
