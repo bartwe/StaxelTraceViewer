@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace Staxel.Trace {
     public class TraceRecorder {
@@ -13,12 +16,26 @@ namespace Staxel.Trace {
         const int RingSize = 10000000;
         const int RingFlushSize = 1000000;
         const int WriteBufferSize = 64 * 1024;
+        private const int QueueSize = 100;
         static SpinLock _lock = new SpinLock();
         static int _ringTail;
         static int _ringHead;
         static FileStream _file;
         static long _epoch;
         static long _tickRation;
+
+        readonly static Queue<long> Averages = new Queue<long>(QueueSize);
+        private static long _lastDuration;
+        public static double AverageDuration;
+
+        public static void CalcInterval() {
+            Averages.Enqueue(Stopwatch.GetTimestamp() - _lastDuration);
+            if(Averages.Count > QueueSize)
+                Averages.Dequeue();
+            AverageDuration = Averages.Average();
+
+            _lastDuration = Stopwatch.GetTimestamp();
+        }
 
         public static void Start() {
             var lockTaken = false;
@@ -42,7 +59,10 @@ namespace Staxel.Trace {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Enter(TraceKey trace) {
+        public static void Enter(TraceKey trace){
+            if(Gearset.Gs.Console != null && Gearset.Gs.Console.Profiler.FrameStarted)
+                Gearset.Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
+            trace.LiveDuration = Stopwatch.GetTimestamp();
             if (_file == null)
                 return;
             TraceRecord traceRecord;
@@ -63,7 +83,10 @@ namespace Staxel.Trace {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Leave(TraceKey trace) {
+        public static void Leave(TraceKey trace){
+            if(Gearset.Gs.Console != null && Gearset.Gs.Console.Profiler.FrameStarted)
+                Gearset.Gs.Console.EndMark(trace.Code);
+            trace.LiveDuration = Stopwatch.GetTimestamp() - trace.LiveDuration;
             if (_file == null)
                 return;
             TraceRecord traceRecord;
