@@ -24,11 +24,11 @@ namespace Staxel.Trace {
         static long _epoch;
         static long _tickRation;
 
-        [Conditional("TRACE")]
+
         readonly static Queue<long> Averages = new Queue<long>(QueueSize);
         private static long _lastDuration;
         public static double AverageDuration;
-
+        [Conditional("TRACE")]
         public static void CalcInterval() {
             Averages.Enqueue(Stopwatch.GetTimestamp() - _lastDuration);
             if(Averages.Count > QueueSize)
@@ -37,7 +37,7 @@ namespace Staxel.Trace {
 
             _lastDuration = Stopwatch.GetTimestamp();
         }
-
+        [Conditional("TRACE")]
         public static void Start() {
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
