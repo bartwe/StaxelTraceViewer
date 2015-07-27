@@ -65,6 +65,8 @@ namespace Staxel.Trace {
         public static TraceKey Multiverse_Update_Previous = new TraceKey(Color.SaddleBrown);
         public static TraceKey Multiverse_Update_Next = new TraceKey(Color.SkyBlue);
         public static TraceKey LodClient_Draw = new TraceKey(Color.GreenYellow);
+        public static TraceKey UniverseRenderer_DrawGeometry = new TraceKey(Color.LightGreen);
+        public static TraceKey UniverseRenderer_DrawGeometryShadow = new TraceKey(Color.DarkGreen);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
