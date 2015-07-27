@@ -28,12 +28,15 @@ namespace Staxel.Trace {
         readonly static Queue<long> Averages = new Queue<long>(QueueSize);
         private static long _lastDuration;
         public static double AverageDuration;
+        public static double FrameDuration;
         [Conditional("TRACE")]
         public static void CalcInterval() {
-            Averages.Enqueue(Stopwatch.GetTimestamp() - _lastDuration);
+            var duration = Stopwatch.GetTimestamp() - _lastDuration;
+            Averages.Enqueue(duration);
             if(Averages.Count > QueueSize)
                 Averages.Dequeue();
-            AverageDuration = Averages.Average();
+            AverageDuration = Averages.Average() / Stopwatch.Frequency;
+            FrameDuration = (double)duration / Stopwatch.Frequency;
 
             _lastDuration = Stopwatch.GetTimestamp();
         }
