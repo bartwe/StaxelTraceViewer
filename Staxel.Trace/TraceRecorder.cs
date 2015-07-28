@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Color = Microsoft.Xna.Framework.Color;
+using Gearset;
+using Microsoft.Xna.Framework;
 
 namespace Staxel.Trace {
     public class TraceRecorder {
@@ -66,8 +66,8 @@ namespace Staxel.Trace {
         [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Enter(TraceKey trace){
-            if(Gearset.Gs.Console != null && Gearset.Gs.Console.Profiler.FrameStarted)
-                Gearset.Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
+            if(Gs.Console != null && Gs.Console.Profiler.FrameStarted)
+                Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
             trace.LiveDuration = Stopwatch.GetTimestamp();
             if (_file == null)
                 return;
@@ -91,8 +91,8 @@ namespace Staxel.Trace {
         [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Leave(TraceKey trace){
-            if(Gearset.Gs.Console != null && Gearset.Gs.Console.Profiler.FrameStarted)
-                Gearset.Gs.Console.EndMark(trace.Code);
+            if(Gs.Console != null && Gs.Console.Profiler.FrameStarted)
+                Gs.Console.EndMark(trace.Code);
             trace.LiveDuration = Stopwatch.GetTimestamp() - trace.LiveDuration;
             if (_file == null)
                 return;
