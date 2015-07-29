@@ -16,38 +16,45 @@ namespace Staxel.Trace {
         const int RingSize = 10000000;
         const int RingFlushSize = 1000000;
         const int WriteBufferSize = 64 * 1024;
-        private const int QueueSize = 100;
+        const int QueueSize = 100;
         static SpinLock _lock = new SpinLock();
         static int _ringTail;
         static int _ringHead;
         static FileStream _file;
         static long _epoch;
         static long _tickRation;
-
-
-        readonly static Queue<long> Averages = new Queue<long>(QueueSize);
-        private static long _lastDuration;
+        static long _lastDuration;
         public static double AverageDuration;
         public static double FrameDuration;
+        static TraceRecord[] RingBuffer;
+        static byte[] WriteBuffer;
+
         [Conditional("TRACE")]
         public static void CalcInterval() {
             var duration = Stopwatch.GetTimestamp() - _lastDuration;
             Averages.Enqueue(duration);
-            if(Averages.Count > QueueSize)
+            if (Averages.Count > QueueSize)
                 Averages.Dequeue();
             AverageDuration = Averages.Average() / Stopwatch.Frequency;
             FrameDuration = (double)duration / Stopwatch.Frequency;
-
             _lastDuration = Stopwatch.GetTimestamp();
         }
+
         [Conditional("TRACE")]
         public static void Start() {
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
+            if (_file != null) {
+                _lock.Exit();
+                return;
+            }
+            _ringHead = 0;
+            _ringTail = 0;
             _epoch = Stopwatch.GetTimestamp();
             _tickRation = 1073741824000000L / Stopwatch.Frequency;
+            RingBuffer = new TraceRecord[RingSize];
+            WriteBuffer = new byte[WriteBufferSize];
             _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
-
             _lock.Exit();
         }
 
@@ -60,13 +67,15 @@ namespace Staxel.Trace {
                 _file.Close();
                 _file = null;
             }
+            RingBuffer = null;
+            WriteBuffer = null;
             _lock.Exit();
         }
 
         [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Enter(TraceKey trace){
-            if(Gs.Console != null && Gs.Console.Profiler.FrameStarted)
+        public static void Enter(TraceKey trace) {
+            if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
                 Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
             trace.LiveDuration = Stopwatch.GetTimestamp();
             if (_file == null)
@@ -90,8 +99,8 @@ namespace Staxel.Trace {
 
         [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Leave(TraceKey trace){
-            if(Gs.Console != null && Gs.Console.Profiler.FrameStarted)
+        public static void Leave(TraceKey trace) {
+            if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
                 Gs.Console.EndMark(trace.Code);
             trace.LiveDuration = Stopwatch.GetTimestamp() - trace.LiveDuration;
             if (_file == null)
@@ -212,7 +221,6 @@ namespace Staxel.Trace {
             internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
         }
 
-        static readonly TraceRecord[] RingBuffer = new TraceRecord[RingSize];
-        static readonly byte[] WriteBuffer = new byte[WriteBufferSize];
+        static readonly Queue<long> Averages = new Queue<long>(QueueSize);
     }
 }
