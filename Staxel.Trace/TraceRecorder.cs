@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Gearset;
-using Microsoft.Xna.Framework;
 
 namespace Staxel.Trace {
     public class TraceRecorder {
@@ -74,13 +73,7 @@ namespace Staxel.Trace {
 
         [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-<<<<<<< HEAD
-        public static void Enter(TraceKey trace){
-=======
         public static void Enter(TraceKey trace) {
-            if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
-                Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
->>>>>>> origin/master
             trace.LiveDuration = Stopwatch.GetTimestamp();
             if (_file == null)
                 return;
@@ -103,13 +96,7 @@ namespace Staxel.Trace {
 
         [Conditional("TRACE")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-<<<<<<< HEAD
-        public static void Leave(TraceKey trace){
-=======
         public static void Leave(TraceKey trace) {
-            if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
-                Gs.Console.EndMark(trace.Code);
->>>>>>> origin/master
             trace.LiveDuration = Stopwatch.GetTimestamp() - trace.LiveDuration;
             if (_file == null)
                 return;
