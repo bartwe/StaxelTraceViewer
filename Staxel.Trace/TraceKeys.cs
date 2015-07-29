@@ -37,6 +37,7 @@ namespace Staxel.Trace {
         public static TraceKey Universe_TimeClone = new TraceKey(Color.DarkOrange);
         public static TraceKey Universe_Deallocate = new TraceKey(Color.DarkKhaki);
         public static TraceKey WorldRenderer_FetchRenderChunks_FetchChunks = new TraceKey(Color.Orange);
+        public static TraceKey WorldRenderer_FetchRenderChunks_FetchChunks_Bind = new TraceKey(Color.Blue);
         public static TraceKey WorldRenderer_FetchRenderChunks_BuildDeltaList = new TraceKey(Color.Red);
         public static TraceKey Server_Update = new TraceKey(Color.DeepSkyBlue);
         public static TraceKey LodServer_Update = new TraceKey(Color.Orange);
@@ -68,6 +69,11 @@ namespace Staxel.Trace {
         public static TraceKey UniverseRenderer_DrawGeometry = new TraceKey(Color.LightGreen);
         public static TraceKey UniverseRenderer_DrawGeometryShadow = new TraceKey(Color.DarkGreen);
         public static TraceKey ClientMainLoop_ProcessPackets_ReceiveLodChunk = new TraceKey(Color.MediumPurple);
+        public static TraceKey UniverseRenderer_Update = new TraceKey(Color.MediumPurple);
+        public static TraceKey StaxelGame_Draw_Gearset = new TraceKey(Color.Aqua);
+        public static TraceKey RenderChunksManager_FrustrumValidate = new TraceKey(Color.Tomato);
+        public static TraceKey RenderChunksManager_RebuildCache = new TraceKey(Color.GreenYellow);
+        public static TraceKey RenderChunksManager_BuildSortedViewRadiusOptions = new TraceKey(Color.Blue);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
