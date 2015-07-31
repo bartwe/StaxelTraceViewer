@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -26,18 +27,19 @@ namespace Staxel.Trace {
         static long _lastDuration;
         public static double AverageDuration;
         public static double FrameDuration;
-        static TraceRecord[] RingBuffer;
-        static byte[] WriteBuffer;
+        static TraceRecord[] _ringBuffer;
+        static byte[] _writeBuffer;
 
         [Conditional("TRACE")]
         public static void CalcInterval() {
-            var duration = Stopwatch.GetTimestamp() - _lastDuration;
+            var now = Stopwatch.GetTimestamp();
+            var duration = now - _lastDuration;
+            _lastDuration = now;
             Averages.Enqueue(duration);
             if (Averages.Count > QueueSize)
                 Averages.Dequeue();
             AverageDuration = Averages.Average() / Stopwatch.Frequency;
             FrameDuration = (double)duration / Stopwatch.Frequency;
-            _lastDuration = Stopwatch.GetTimestamp();
         }
 
         [Conditional("TRACE")]
@@ -52,8 +54,8 @@ namespace Staxel.Trace {
             _ringTail = 0;
             _epoch = Stopwatch.GetTimestamp();
             _tickRation = 1073741824000000L / Stopwatch.Frequency;
-            RingBuffer = new TraceRecord[RingSize];
-            WriteBuffer = new byte[WriteBufferSize];
+            _ringBuffer = new TraceRecord[RingSize];
+            _writeBuffer = new byte[WriteBufferSize];
             _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
             _lock.Exit();
         }
@@ -67,17 +69,17 @@ namespace Staxel.Trace {
                 _file.Close();
                 _file = null;
             }
-            RingBuffer = null;
-            WriteBuffer = null;
+            _ringBuffer = null;
+            _writeBuffer = null;
             _lock.Exit();
         }
 
         [Conditional("TRACE")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [TargetedPatchingOptOut("")][MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Enter(TraceKey trace) {
             if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
                 Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
-            trace.LiveDuration = Stopwatch.GetTimestamp();
+            trace.EnterTimestamp = Stopwatch.GetTimestamp();
             if (_file == null)
                 return;
             TraceRecord traceRecord;
@@ -86,7 +88,7 @@ namespace Staxel.Trace {
             traceRecord.Scope = (trace.Id << 1) | 1;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            RingBuffer[_ringHead++] = traceRecord;
+            _ringBuffer[_ringHead++] = traceRecord;
             if (_ringHead == RingSize)
                 _ringHead = 0;
             if (_ringTail == _ringHead) {
@@ -98,11 +100,13 @@ namespace Staxel.Trace {
         }
 
         [Conditional("TRACE")]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [TargetedPatchingOptOut("")][MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Leave(TraceKey trace) {
             if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
                 Gs.Console.EndMark(trace.Code);
-            trace.LiveDuration = Stopwatch.GetTimestamp() - trace.LiveDuration;
+            
+            trace.LiveDuration += Stopwatch.GetTimestamp() - trace.EnterTimestamp;
+
             if (_file == null)
                 return;
             TraceRecord traceRecord;
@@ -111,7 +115,7 @@ namespace Staxel.Trace {
             traceRecord.Scope = (trace.Id << 1) | 0;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            RingBuffer[_ringHead++] = traceRecord;
+            _ringBuffer[_ringHead++] = traceRecord;
             if (_ringHead == RingSize)
                 _ringHead = 0;
             if (_ringTail == _ringHead) {
@@ -139,16 +143,16 @@ namespace Staxel.Trace {
                         if (limit < _ringTail)
                             limit = RingSize;
                         var length = limit - _ringTail;
-                        if (length > WriteBuffer.Length / RecordSize)
-                            length = WriteBuffer.Length / RecordSize;
+                        if (length > _writeBuffer.Length / RecordSize)
+                            length = _writeBuffer.Length / RecordSize;
                         var bytes = length * RecordSize;
                         {
-                            fixed (TraceRecord* from = &RingBuffer[_ringTail])
-                            fixed (byte* to = &WriteBuffer[0]) {
+                            fixed (TraceRecord* from = &_ringBuffer[_ringTail])
+                            fixed (byte* to = &_writeBuffer[0]) {
                                 UnsafeNativeMethods.MoveMemory(to, from, bytes);
                             }
                         }
-                        _file.Write(WriteBuffer, 0, bytes);
+                        _file.Write(_writeBuffer, 0, bytes);
                         _ringTail += length;
                         if (_ringTail == RingSize)
                             _ringTail = 0;

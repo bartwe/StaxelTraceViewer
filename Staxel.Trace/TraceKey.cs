@@ -19,6 +19,7 @@ namespace Staxel.Trace {
         public string Code { get; set; }
         public int Id { get; set; }
         public Color Color { get; private set; }
+        public long EnterTimestamp { get; set; }
         public long LiveDuration { get; set; }
     }
 }

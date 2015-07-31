@@ -74,6 +74,12 @@ namespace Staxel.Trace {
         public static TraceKey RenderChunksManager_FrustrumValidate = new TraceKey(Color.Tomato);
         public static TraceKey RenderChunksManager_RebuildCache = new TraceKey(Color.GreenYellow);
         public static TraceKey RenderChunksManager_BuildSortedViewRadiusOptions = new TraceKey(Color.Blue);
+        public static TraceKey GpuResources = new TraceKey(Color.Red);
+        public static TraceKey RenderChunksManager_RebuildCache_1 = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey RenderChunksManager_RebuildCache_2 = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey RenderChunksManager_RebuildCache_3 = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey RenderChunksManager_RebuildCache_4 = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey RenderChunksManager_RebuildCache_5 = new TraceKey(Color.DarkGoldenrod);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
@@ -85,6 +91,7 @@ namespace Staxel.Trace {
                 Keys.Add(scope);
             }
         }
+
 
         public static IEnumerable<TraceKey> All() {
             return Keys;
