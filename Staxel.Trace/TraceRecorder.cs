@@ -75,7 +75,8 @@ namespace Staxel.Trace {
         }
 
         [Conditional("TRACE")]
-        [TargetedPatchingOptOut("")][MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [TargetedPatchingOptOut("")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Enter(TraceKey trace) {
             if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
                 Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
@@ -100,11 +101,12 @@ namespace Staxel.Trace {
         }
 
         [Conditional("TRACE")]
-        [TargetedPatchingOptOut("")][MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [TargetedPatchingOptOut("")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Leave(TraceKey trace) {
             if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
                 Gs.Console.EndMark(trace.Code);
-            
+
             trace.LiveDuration += Stopwatch.GetTimestamp() - trace.EnterTimestamp;
 
             if (_file == null)

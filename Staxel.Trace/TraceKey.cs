@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
+﻿using System.Drawing;
 
 namespace Staxel.Trace {
-    public class TraceKey{
+    public class TraceKey {
         public TraceKey(string code, int id, Color color) {
             Code = code;
             Id = id;
@@ -14,7 +11,6 @@ namespace Staxel.Trace {
         public TraceKey(Color color) {
             Color = color;
         }
-
 
         public string Code { get; set; }
         public int Id { get; set; }
