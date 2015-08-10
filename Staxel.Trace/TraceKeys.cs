@@ -77,6 +77,7 @@ namespace Staxel.Trace {
         public static TraceKey GpuResources = new TraceKey(Color.Red);
         public static TraceKey GpuVertexBuffer_SetData = new TraceKey(Color.GreenYellow);
         public static TraceKey PrepareIndexBuffer = new TraceKey(Color.Red);
+        public static TraceKey UniverseRenderer_DrawSelectionCursor = new TraceKey(Color.White);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
