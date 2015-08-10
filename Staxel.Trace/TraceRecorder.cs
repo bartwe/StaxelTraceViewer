@@ -8,11 +8,12 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Gearset;
-using Microsoft.Xna.Framework;
 
 namespace Staxel.Trace {
     public class TraceRecorder {
+        public static Action<TraceKey> EnterHook;
+        public static Action<TraceKey> LeaveHook;
+
         const int RecordSize = 12; // must match struct Entry's size
         const int RingSize = 10000000;
         const int RingFlushSize = 1000000;
@@ -78,8 +79,8 @@ namespace Staxel.Trace {
         [TargetedPatchingOptOut("")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Enter(TraceKey trace) {
-            if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
-                Gs.Console.BeginMark(trace.Code, new Color(trace.Color.R, trace.Color.G, trace.Color.B));
+            if (EnterHook != null)
+                EnterHook(trace);
             trace.EnterTimestamp = Stopwatch.GetTimestamp();
             if (_file == null)
                 return;
@@ -104,11 +105,9 @@ namespace Staxel.Trace {
         [TargetedPatchingOptOut("")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Leave(TraceKey trace) {
-            if (Gs.Console != null && Gs.Console.Profiler.FrameStarted)
-                Gs.Console.EndMark(trace.Code);
-
+            if (LeaveHook != null)
+                LeaveHook(trace);
             trace.LiveDuration += Stopwatch.GetTimestamp() - trace.EnterTimestamp;
-
             if (_file == null)
                 return;
             TraceRecord traceRecord;

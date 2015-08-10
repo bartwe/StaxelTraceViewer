@@ -38,7 +38,6 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
@@ -48,12 +47,6 @@
     <Compile Include="TraceRecorder.cs" />
     <Compile Include="TraceKey.cs" />
     <Compile Include="TraceKeys.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Gearset\Gearset\Windows - Gearset.csproj">
-      <Project>{972591d9-ec31-44f2-b860-a060f4a7d9c5}</Project>
-      <Name>Windows - Gearset</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
