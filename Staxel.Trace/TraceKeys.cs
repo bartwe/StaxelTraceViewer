@@ -75,11 +75,8 @@ namespace Staxel.Trace {
         public static TraceKey RenderChunksManager_RebuildCache = new TraceKey(Color.GreenYellow);
         public static TraceKey RenderChunksManager_BuildSortedViewRadiusOptions = new TraceKey(Color.Blue);
         public static TraceKey GpuResources = new TraceKey(Color.Red);
-        public static TraceKey RenderChunksManager_RebuildCache_1 = new TraceKey(Color.DarkGoldenrod);
-        public static TraceKey RenderChunksManager_RebuildCache_2 = new TraceKey(Color.DarkGoldenrod);
-        public static TraceKey RenderChunksManager_RebuildCache_3 = new TraceKey(Color.DarkGoldenrod);
-        public static TraceKey RenderChunksManager_RebuildCache_4 = new TraceKey(Color.DarkGoldenrod);
-        public static TraceKey RenderChunksManager_RebuildCache_5 = new TraceKey(Color.DarkGoldenrod);
+        public static TraceKey GpuVertexBuffer_SetData = new TraceKey(Color.GreenYellow);
+        public static TraceKey PrepareIndexBuffer = new TraceKey(Color.Red);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
