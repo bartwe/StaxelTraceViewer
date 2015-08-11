@@ -71,7 +71,7 @@ namespace Staxel.Trace {
         public static TraceKey ClientMainLoop_ProcessPackets_ReceiveLodChunk = new TraceKey(Color.MediumPurple);
         public static TraceKey UniverseRenderer_Update = new TraceKey(Color.MediumPurple);
         public static TraceKey StaxelGame_Draw_Gearset = new TraceKey(Color.Aqua);
-        public static TraceKey RenderChunksManager_FrustrumValidate = new TraceKey(Color.Tomato);
+        public static TraceKey RenderChunksManager_FrustumValidate = new TraceKey(Color.Tomato);
         public static TraceKey RenderChunksManager_RebuildCache = new TraceKey(Color.GreenYellow);
         public static TraceKey RenderChunksManager_BuildSortedViewRadiusOptions = new TraceKey(Color.Blue);
         public static TraceKey GpuResources = new TraceKey(Color.Red);
