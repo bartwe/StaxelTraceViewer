@@ -320,11 +320,11 @@ namespace Staxel.TraceViewer {
             UpdateBitmap();
         }
 
-        class Counter {
+        sealed class Counter {
             public long Value;
         }
 
-        class Sum {
+        sealed class Sum {
             public TraceKey Key;
             public long Inclusive;
             public long Exclusive;
@@ -347,7 +347,7 @@ namespace Staxel.TraceViewer {
             public bool HorribleFrame;
         }
 
-        class Context {
+        sealed class Context {
             public readonly Stack<TraceRecorder.TraceEvent> Stack = new Stack<TraceRecorder.TraceEvent>();
             public int Offset;
         }

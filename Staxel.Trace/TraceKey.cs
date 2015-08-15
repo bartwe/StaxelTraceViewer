@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 
 namespace Staxel.Trace {
-    public class TraceKey {
+    public sealed class TraceKey {
         public TraceKey(string code, int id, Color color) {
             Code = code;
             Id = id;

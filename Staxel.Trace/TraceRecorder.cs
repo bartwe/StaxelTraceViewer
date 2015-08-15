@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Staxel.Trace {
-    public class TraceRecorder {
+    public sealed class TraceRecorder {
         public static Action<TraceKey> EnterHook;
         public static Action<TraceKey> LeaveHook;
 
@@ -221,7 +221,7 @@ namespace Staxel.Trace {
             [FieldOffset(8)] public int Scope;
         }
 
-        class UnsafeNativeMethods {
+        sealed class UnsafeNativeMethods {
             [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
             internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
         }
