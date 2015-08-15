@@ -11,14 +11,13 @@ using System.Threading;
 
 namespace Staxel.Trace {
     public sealed class TraceRecorder {
-        public static Action<TraceKey> EnterHook;
-        public static Action<TraceKey> LeaveHook;
-
         const int RecordSize = 12; // must match struct Entry's size
         const int RingSize = 10000000;
         const int RingFlushSize = 1000000;
         const int WriteBufferSize = 64 * 1024;
         const int QueueSize = 100;
+        public static Action<TraceKey> EnterHook;
+        public static Action<TraceKey> LeaveHook;
         static SpinLock _lock = new SpinLock();
         static int _ringTail;
         static int _ringHead;
