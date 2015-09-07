@@ -26,6 +26,7 @@ namespace Staxel.Trace {
         static long _tickRation;
         static long _lastDuration;
         public static double AverageDuration;
+        public static double MaximumDuration;
         public static double FrameDuration;
         static TraceRecord[] _ringBuffer;
         static byte[] _writeBuffer;
@@ -39,6 +40,7 @@ namespace Staxel.Trace {
             if (Averages.Count > QueueSize)
                 Averages.Dequeue();
             AverageDuration = Averages.Average() / Stopwatch.Frequency;
+            MaximumDuration = (double)Averages.Max() / Stopwatch.Frequency;
             FrameDuration = (double)duration / Stopwatch.Frequency;
         }
 
