@@ -82,7 +82,8 @@ namespace Staxel.TraceViewer {
                         bar.HorribleFrame = false;
                         bars.Add(bar);
                     }
-                    skip_entry: {}
+                    skip_entry:
+                    {}
                 }
             }
             _bars = bars.ToArray();
