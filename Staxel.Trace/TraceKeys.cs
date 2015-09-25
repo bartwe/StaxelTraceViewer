@@ -45,6 +45,7 @@ namespace Staxel.Trace {
         public static TraceKey Server_Update_Packets = new TraceKey(Color.LawnGreen);
         public static TraceKey Server_Update_ConnectionsClosed = new TraceKey(Color.Blue);
         public static TraceKey Server_Update_Multiverse = new TraceKey(Color.LightGreen);
+        public static TraceKey Server_Update_Behavior = new TraceKey(Color.Red);
         public static TraceKey Server_Update_Connections = new TraceKey(Color.White);
         public static TraceKey ClientServerChunkManager_Update = new TraceKey(Color.Brown);
         public static TraceKey LodViewController_Update = new TraceKey(Color.MediumPurple);
