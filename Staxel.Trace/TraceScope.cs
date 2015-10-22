@@ -14,7 +14,6 @@ namespace Staxel.Trace {
             TraceRecorder.Enter(Key);
         }
 
-        [Conditional("TRACE")]
         [TargetedPatchingOptOut("")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose() {
