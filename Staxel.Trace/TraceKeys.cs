@@ -67,6 +67,8 @@ namespace Staxel.Trace {
         public static TraceKey Multiverse_Update_Previous = new TraceKey(Color.SaddleBrown);
         public static TraceKey Multiverse_Update_Next = new TraceKey(Color.SkyBlue);
         public static TraceKey LodClient_Draw = new TraceKey(Color.GreenYellow);
+        public static TraceKey LodClient_Update = new TraceKey(Color.Blue);
+        public static TraceKey LodClient_RebuildVisibility = new TraceKey(Color.Red);
         public static TraceKey UniverseRenderer_DrawGeometry = new TraceKey(Color.LightGreen);
         public static TraceKey UniverseRenderer_DrawGeometryShadow = new TraceKey(Color.DarkGreen);
         public static TraceKey ClientMainLoop_ProcessPackets_ReceiveLodChunk = new TraceKey(Color.MediumPurple);
@@ -79,6 +81,35 @@ namespace Staxel.Trace {
         public static TraceKey GpuVertexBuffer_SetData = new TraceKey(Color.GreenYellow);
         public static TraceKey PrepareIndexBuffer = new TraceKey(Color.Red);
         public static TraceKey UniverseRenderer_DrawSelectionCursor = new TraceKey(Color.White);
+
+
+        public static TraceKey A = new TraceKey(Color.LightYellow);
+        public static TraceKey B = new TraceKey(Color.LightYellow);
+        public static TraceKey C = new TraceKey(Color.LightYellow);
+        public static TraceKey D = new TraceKey(Color.LightYellow);
+        public static TraceKey E = new TraceKey(Color.LightYellow);
+        public static TraceKey F = new TraceKey(Color.LightYellow);
+        public static TraceKey G = new TraceKey(Color.LightYellow);
+        public static TraceKey H = new TraceKey(Color.LightYellow);
+        public static TraceKey I = new TraceKey(Color.LightYellow);
+        public static TraceKey J = new TraceKey(Color.LightYellow);
+        public static TraceKey K = new TraceKey(Color.LightYellow);
+        public static TraceKey L = new TraceKey(Color.LightYellow);
+        public static TraceKey M = new TraceKey(Color.LightYellow);
+        public static TraceKey N = new TraceKey(Color.LightYellow);
+        public static TraceKey O = new TraceKey(Color.LightYellow);
+        public static TraceKey P = new TraceKey(Color.LightYellow);
+        public static TraceKey Q = new TraceKey(Color.LightYellow);
+        public static TraceKey R = new TraceKey(Color.LightYellow);
+        public static TraceKey S = new TraceKey(Color.LightYellow);
+        public static TraceKey T = new TraceKey(Color.LightYellow);
+        public static TraceKey U = new TraceKey(Color.LightYellow);
+        public static TraceKey V = new TraceKey(Color.LightYellow);
+        public static TraceKey W = new TraceKey(Color.LightYellow);
+        public static TraceKey X = new TraceKey(Color.LightYellow);
+        public static TraceKey Y = new TraceKey(Color.LightYellow);
+        public static TraceKey Z = new TraceKey(Color.LightYellow);
+
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
