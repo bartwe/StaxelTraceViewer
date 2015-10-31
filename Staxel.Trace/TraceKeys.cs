@@ -18,6 +18,7 @@ namespace Staxel.Trace {
         public static TraceKey UniverseRenderer_DrawInWorld = new TraceKey(Color.Tomato);
         public static TraceKey StaxelGame_Draw = new TraceKey(Color.Green);
         public static TraceKey StaxelGame_Update = new TraceKey(Color.Magenta);
+        public static TraceKey StaxelGame_Present = new TraceKey(Color.Cyan);
         public static TraceKey EntityRenderer_Draw = new TraceKey(Color.MediumOrchid);
         public static TraceKey ChunkRenderer_Render = new TraceKey(Color.Brown);
         public static TraceKey ChunkRenderer_PendingBuildQueue = new TraceKey(Color.White);
@@ -78,7 +79,11 @@ namespace Staxel.Trace {
         public static TraceKey RenderChunksManager_RebuildCache = new TraceKey(Color.GreenYellow);
         public static TraceKey RenderChunksManager_BuildSortedViewRadiusOptions = new TraceKey(Color.Blue);
         public static TraceKey GpuResources = new TraceKey(Color.Red);
-        public static TraceKey GpuVertexBuffer_SetData = new TraceKey(Color.GreenYellow);
+        public static TraceKey GpuResources_StartOfFrame = new TraceKey(Color.Blue);
+        public static TraceKey GpuResources_FrameQuery = new TraceKey(Color.GreenYellow);
+        public static TraceKey GpuResources_PostPresent = new TraceKey(Color.Blue);
+        public static TraceKey LongLivedVertexStorage_Flush = new TraceKey(Color.Red);
+        public static TraceKey LongLivedVertexStorage_Compact = new TraceKey(Color.MediumPurple);
         public static TraceKey PrepareIndexBuffer = new TraceKey(Color.Red);
         public static TraceKey UniverseRenderer_DrawSelectionCursor = new TraceKey(Color.White);
 
