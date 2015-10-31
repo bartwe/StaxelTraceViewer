@@ -215,7 +215,7 @@ namespace Staxel.TraceViewer {
                             if ((maxFrame - minFrame) < 20) {
                                 for (var i = minFrame; i <= maxFrame; ++i) {
                                     var px = (float)((i * interval - epoch) * xScale);
-                                    if ((px >= 0)&&(px<10000))
+                                    if ((px >= 0) && (px < 10000))
                                         g.DrawLine(pen, px, 0, px, _newScreenBuffer.Height);
                                 }
                             }
