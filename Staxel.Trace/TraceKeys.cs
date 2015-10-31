@@ -84,6 +84,7 @@ namespace Staxel.Trace {
         public static TraceKey GpuResources_PostPresent = new TraceKey(Color.Blue);
         public static TraceKey LongLivedVertexStorage_Flush = new TraceKey(Color.Red);
         public static TraceKey LongLivedVertexStorage_Compact = new TraceKey(Color.MediumPurple);
+        public static TraceKey ShortLivedVertexStorage_SetData = new TraceKey(Color.Red);
         public static TraceKey PrepareIndexBuffer = new TraceKey(Color.Red);
         public static TraceKey UniverseRenderer_DrawSelectionCursor = new TraceKey(Color.White);
 
