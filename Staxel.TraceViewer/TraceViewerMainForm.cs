@@ -149,30 +149,30 @@ namespace Staxel.TraceViewer {
             Console.WriteLine();
             Console.WriteLine("Inclusive: ");
             foreach (var top10 in filteredSums.Sorted((a, b) => -a.Inclusive.CompareTo(b.Inclusive)).Take(10))
-                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.Inclusive.ToString().PadRight(12) + " \\ " + top10.Calls);
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.Inclusive.ToString(CultureInfo.InvariantCulture).PadRight(12) + " \\ " + top10.Calls);
             Console.WriteLine();
             Console.WriteLine("Exclusive: ");
             foreach (var top10 in filteredSums.Sorted((a, b) => -a.Exclusive.CompareTo(b.Exclusive)).Take(10))
-                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.Exclusive.ToString().PadRight(12) + " \\ " + top10.Calls);
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.Exclusive.ToString(CultureInfo.InvariantCulture).PadRight(12) + " \\ " + top10.Calls);
 
             Console.WriteLine();
             Console.WriteLine("InclusiveLate: ");
             foreach (var top10 in filteredSums.Sorted((a, b) => -a.InclusiveLate.CompareTo(b.InclusiveLate)).Take(10))
-                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.InclusiveLate.ToString().PadRight(12) + " \\ " + top10.CallsLate);
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.InclusiveLate.ToString(CultureInfo.InvariantCulture).PadRight(12) + " \\ " + top10.CallsLate);
             Console.WriteLine();
             Console.WriteLine("ExclusiveLate: ");
             foreach (var top10 in filteredSums.Sorted((a, b) => -a.ExclusiveLate.CompareTo(b.ExclusiveLate)).Take(10))
-                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveLate.ToString().PadRight(12) + " \\ " + top10.CallsLate);
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveLate.ToString(CultureInfo.InvariantCulture).PadRight(12) + " \\ " + top10.CallsLate);
 
 
             Console.WriteLine();
             Console.WriteLine("InclusiveHorrible: ");
             foreach (var top10 in filteredSums.Sorted((a, b) => -a.InclusiveHorrible.CompareTo(b.InclusiveHorrible)).Take(10))
-                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.InclusiveHorrible.ToString().PadRight(12) + " \\ " + top10.CallsHorrible);
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.InclusiveHorrible.ToString(CultureInfo.InvariantCulture).PadRight(12) + " \\ " + top10.CallsHorrible);
             Console.WriteLine();
             Console.WriteLine("ExclusiveHorrible: ");
             foreach (var top10 in filteredSums.Sorted((a, b) => -a.ExclusiveHorrible.CompareTo(b.ExclusiveHorrible)).Take(10))
-                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveHorrible.ToString().PadRight(12) + " \\ " + top10.CallsHorrible);
+                Console.WriteLine(top10.Key.Code.PadRight(68) + ": " + top10.ExclusiveHorrible.ToString(CultureInfo.InvariantCulture).PadRight(12) + " \\ " + top10.CallsHorrible);
 
             UpdateBitmap();
         }
