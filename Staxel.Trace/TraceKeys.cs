@@ -91,6 +91,8 @@ namespace Staxel.Trace {
         public static TraceKey ShortLivedVertexStorage_SetDataHead = new TraceKey(Color.Orange);
         public static TraceKey PrepareIndexBuffer = new TraceKey(Color.Red);
         public static TraceKey UniverseRenderer_DrawSelectionCursor = new TraceKey(Color.White);
+        public static TraceKey UserInput_Update = new TraceKey(Color.Blue);
+        public static TraceKey StaxelGame_Memory = new TraceKey(Color.MediumPurple);
 
         public static TraceKey A = new TraceKey(Color.LightYellow);
         public static TraceKey B = new TraceKey(Color.LightYellow);
@@ -118,6 +120,7 @@ namespace Staxel.Trace {
         public static TraceKey X = new TraceKey(Color.LightYellow);
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
+
 
 
         static TraceKeys() {
