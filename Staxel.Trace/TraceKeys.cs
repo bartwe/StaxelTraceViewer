@@ -12,6 +12,10 @@ namespace Staxel.Trace {
         public static TraceKey Universe_Update = new TraceKey(Color.Blue);
         public static TraceKey ClientMainLoop_Update = new TraceKey(Color.LightYellow);
         public static TraceKey ClientMainLoop_ProcessPackets = new TraceKey(Color.LightSlateGray);
+        public static TraceKey ClientMainLoop_ReceiveActivateBundle = new TraceKey(Color.Blue);
+        public static TraceKey ClientMainLoop_ReceiveBundleResource = new TraceKey(Color.Yellow);
+        public static TraceKey ClientMainLoop_ReceiveChunkData = new TraceKey(Color.Green);
+        public static TraceKey ClientMainLoop_ReceiveChunkDenied = new TraceKey(Color.Red);
         public static TraceKey Recorder_Flush = new TraceKey(Color.DeepPink);
         public static TraceKey UniverseRenderer_Draw = new TraceKey(Color.LightSteelBlue);
         public static TraceKey ParticleRenderer_Render = new TraceKey(Color.Yellow);
@@ -80,13 +84,13 @@ namespace Staxel.Trace {
         public static TraceKey GpuResources = new TraceKey(Color.Red);
         public static TraceKey GpuResources_StartOfFrame = new TraceKey(Color.Blue);
         public static TraceKey GpuResources_FrameQuery = new TraceKey(Color.GreenYellow);
-        public static TraceKey GpuResources_PostPresent = new TraceKey(Color.Blue);
+        public static TraceKey GpuResources_BeforePresent = new TraceKey(Color.Blue);
         public static TraceKey LongLivedVertexStorage_Flush = new TraceKey(Color.Red);
         public static TraceKey LongLivedVertexStorage_Compact = new TraceKey(Color.MediumPurple);
         public static TraceKey ShortLivedVertexStorage_SetData = new TraceKey(Color.Red);
+        public static TraceKey ShortLivedVertexStorage_SetDataHead = new TraceKey(Color.Orange);
         public static TraceKey PrepareIndexBuffer = new TraceKey(Color.Red);
         public static TraceKey UniverseRenderer_DrawSelectionCursor = new TraceKey(Color.White);
-
 
         public static TraceKey A = new TraceKey(Color.LightYellow);
         public static TraceKey B = new TraceKey(Color.LightYellow);
