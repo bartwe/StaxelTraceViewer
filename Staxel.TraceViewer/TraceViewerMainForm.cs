@@ -182,6 +182,8 @@ namespace Staxel.TraceViewer {
                 _updateRequested = true;
                 return;
             }
+            if (_bars == null)
+                return;
             _updatePending = true;
 
             if ((_newScreenBuffer != null) && ((_newScreenBuffer.Width != Width) || (_newScreenBuffer.Height != Height))) {
