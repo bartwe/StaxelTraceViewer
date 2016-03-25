@@ -122,7 +122,6 @@ namespace Staxel.Trace {
         public static TraceKey Z = new TraceKey(Color.LightYellow);
 
 
-
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
             var id = 1;
