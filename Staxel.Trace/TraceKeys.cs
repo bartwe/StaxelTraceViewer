@@ -121,6 +121,10 @@ namespace Staxel.Trace {
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
 
+        // git troubles, fix when at main pc
+        public static TraceKey Multiverse_Update_Universe = new TraceKey(Color.MediumPurple);
+        public static TraceKey Client_Update_AvatarController = new TraceKey(Color.MediumPurple);
+
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
