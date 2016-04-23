@@ -67,9 +67,7 @@ namespace Staxel.Trace {
         public static TraceKey PlayerEntityLogic_Update_EntityRayIntersect = new TraceKey(Color.Aqua);
         public static TraceKey PlayerEntityLogic_Update_Camera = new TraceKey(Color.White);
         public static TraceKey EntityUniverseFacade_InnerTerrainRayIntersect_ReadTiles = new TraceKey(Color.Brown);
-        public static TraceKey Multiverse_Update_Bedrock = new TraceKey(Color.DarkKhaki);
-        public static TraceKey Multiverse_Update_Catchup = new TraceKey(Color.Red);
-        public static TraceKey Multiverse_Update_Current = new TraceKey(Color.SkyBlue);
+        public static TraceKey Multiverse_Update_Universe = new TraceKey(Color.DarkKhaki);
         public static TraceKey LodClient_Draw = new TraceKey(Color.GreenYellow);
         public static TraceKey LodClient_Update = new TraceKey(Color.Blue);
         public static TraceKey LodClient_RebuildVisibility = new TraceKey(Color.Red);
@@ -93,6 +91,9 @@ namespace Staxel.Trace {
         public static TraceKey UniverseRenderer_DrawSelectionCursor = new TraceKey(Color.White);
         public static TraceKey UserInput_Update = new TraceKey(Color.Blue);
         public static TraceKey StaxelGame_Memory = new TraceKey(Color.MediumPurple);
+        public static TraceKey Client_Update_AvatarController = new TraceKey(Color.Blue);
+
+        // usable for temporary tracescopes, use fully named ones when using them longterm
 
         public static TraceKey A = new TraceKey(Color.LightYellow);
         public static TraceKey B = new TraceKey(Color.LightYellow);
@@ -120,11 +121,6 @@ namespace Staxel.Trace {
         public static TraceKey X = new TraceKey(Color.LightYellow);
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
-
-        // git troubles, fix when at main pc
-        public static TraceKey Multiverse_Update_Universe = new TraceKey(Color.MediumPurple);
-        public static TraceKey Client_Update_AvatarController = new TraceKey(Color.MediumPurple);
-
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
