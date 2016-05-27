@@ -39,8 +39,17 @@ namespace Staxel.Trace {
             Averages.Enqueue(duration);
             if (Averages.Count > QueueSize)
                 Averages.Dequeue();
-            AverageDuration = Averages.Average() / Stopwatch.Frequency;
-            MaximumDuration = (double)Averages.Max() / Stopwatch.Frequency;
+
+            var sum = 0.0;
+            var max = 0.0;
+            foreach (var entry in Averages) {
+                if (entry > max)
+                    max = entry;
+                sum += entry;
+            }
+
+            AverageDuration = (sum / Averages.Count) / Stopwatch.Frequency;
+            MaximumDuration = max / Stopwatch.Frequency;
             FrameDuration = (double)duration / Stopwatch.Frequency;
         }
 
