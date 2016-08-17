@@ -92,6 +92,7 @@ namespace Staxel.Trace {
         public static TraceKey UserInput_Update = new TraceKey(Color.Blue);
         public static TraceKey StaxelGame_Memory = new TraceKey(Color.MediumPurple);
         public static TraceKey Client_Update_AvatarController = new TraceKey(Color.Blue);
+        public static TraceKey InputSource_ScanDevices = new TraceKey(Color.Orange);
 
         // usable for temporary tracescopes, use fully named ones when using them longterm
 
@@ -121,6 +122,7 @@ namespace Staxel.Trace {
         public static TraceKey X = new TraceKey(Color.LightYellow);
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
+
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
