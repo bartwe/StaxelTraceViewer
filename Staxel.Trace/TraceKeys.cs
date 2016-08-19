@@ -73,6 +73,7 @@ namespace Staxel.Trace {
         public static TraceKey LodClient_RebuildVisibility = new TraceKey(Color.Red);
         public static TraceKey UniverseRenderer_DrawGeometry = new TraceKey(Color.LightGreen);
         public static TraceKey UniverseRenderer_DrawGeometryShadow = new TraceKey(Color.DarkGreen);
+        public static TraceKey UniverseRenderer_DrawGeometryInside = new TraceKey(Color.LightBlue);
         public static TraceKey ClientMainLoop_ProcessPackets_ReceiveLodChunk = new TraceKey(Color.MediumPurple);
         public static TraceKey UniverseRenderer_Update = new TraceKey(Color.MediumPurple);
         public static TraceKey StaxelGame_Draw_Gearset = new TraceKey(Color.Aqua);
@@ -93,6 +94,7 @@ namespace Staxel.Trace {
         public static TraceKey StaxelGame_Memory = new TraceKey(Color.MediumPurple);
         public static TraceKey Client_Update_AvatarController = new TraceKey(Color.Blue);
         public static TraceKey InputSource_ScanDevices = new TraceKey(Color.Orange);
+        public static TraceKey BrowserRenderSurface_UpdateTexture_SetData = new TraceKey(Color.Orange);
 
         // usable for temporary tracescopes, use fully named ones when using them longterm
 
