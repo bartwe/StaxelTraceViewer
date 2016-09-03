@@ -71,6 +71,7 @@ namespace Staxel.Trace {
         public static TraceKey LodClient_Draw = new TraceKey(Color.GreenYellow);
         public static TraceKey LodClient_Update = new TraceKey(Color.Blue);
         public static TraceKey LodClient_RebuildVisibility = new TraceKey(Color.Red);
+        public static TraceKey UniverseRenderer_BeforeDrawGeometry = new TraceKey(Color.Aquamarine);
         public static TraceKey UniverseRenderer_DrawGeometry = new TraceKey(Color.LightGreen);
         public static TraceKey UniverseRenderer_DrawGeometryShadow = new TraceKey(Color.DarkGreen);
         public static TraceKey UniverseRenderer_DrawGeometryInside = new TraceKey(Color.LightBlue);
