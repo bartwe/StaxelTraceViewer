@@ -10,7 +10,9 @@ namespace Staxel.Trace {
         public static TraceKey ClientMainLoop_Draw = new TraceKey(Color.LightGreen);
         public static TraceKey Multiverse_Update = new TraceKey(Color.Purple);
         public static TraceKey Universe_Update = new TraceKey(Color.Blue);
+        public static TraceKey Universe_RenderUpdate = new TraceKey(Color.Red);
         public static TraceKey ClientMainLoop_Update = new TraceKey(Color.LightYellow);
+        public static TraceKey ClientMainLoop_Update_SendPackets = new TraceKey(Color.LightGreen);
         public static TraceKey ClientMainLoop_ProcessPackets = new TraceKey(Color.LightSlateGray);
         public static TraceKey ClientMainLoop_ReceiveActivateBundle = new TraceKey(Color.Blue);
         public static TraceKey ClientMainLoop_ReceiveBundleResource = new TraceKey(Color.Yellow);
@@ -97,7 +99,8 @@ namespace Staxel.Trace {
         public static TraceKey Client_Update_AvatarController = new TraceKey(Color.Blue);
         public static TraceKey InputSource_ScanDevices = new TraceKey(Color.Orange);
         public static TraceKey BrowserRenderSurface_UpdateTexture_SetData = new TraceKey(Color.Orange);
-
+        public static TraceKey VertexManager_StartOfFrame = new TraceKey(Color.Orange);
+        public static TraceKey VertexManager_ReleaseLostSurfaces = new TraceKey(Color.MediumPurple);
         // usable for temporary tracescopes, use fully named ones when using them longterm
 
         public static TraceKey A = new TraceKey(Color.LightYellow);
@@ -126,7 +129,6 @@ namespace Staxel.Trace {
         public static TraceKey X = new TraceKey(Color.LightYellow);
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
-
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
