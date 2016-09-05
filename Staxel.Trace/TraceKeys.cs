@@ -18,6 +18,7 @@ namespace Staxel.Trace {
         public static TraceKey ClientMainLoop_ReceiveChunkDenied = new TraceKey(Color.Red);
         public static TraceKey Recorder_Flush = new TraceKey(Color.DeepPink);
         public static TraceKey UniverseRenderer_Draw = new TraceKey(Color.LightSteelBlue);
+        public static TraceKey UniverseRenderer_Post = new TraceKey(Color.Red);
         public static TraceKey ParticleRenderer_Render = new TraceKey(Color.Yellow);
         public static TraceKey UniverseRenderer_DrawInWorld = new TraceKey(Color.Tomato);
         public static TraceKey StaxelGame_Draw = new TraceKey(Color.Green);
