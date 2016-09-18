@@ -101,6 +101,12 @@ namespace Staxel.Trace {
         public static TraceKey BrowserRenderSurface_UpdateTexture_SetData = new TraceKey(Color.Orange);
         public static TraceKey VertexManager_StartOfFrame = new TraceKey(Color.Orange);
         public static TraceKey VertexManager_ReleaseLostSurfaces = new TraceKey(Color.MediumPurple);
+        public static TraceKey ActiveChunkTracker_UpdatePlayerPosition = new TraceKey(Color.MediumPurple);
+        public static TraceKey ChunkActivityDatabase_Update = new TraceKey(Color.MediumPurple);
+        public static TraceKey ServerMainLoop_SendStepPackets = new TraceKey(Color.Orange);
+        public static TraceKey Entities_SendEntityPackets = new TraceKey(Color.Red);
+        
+
         // usable for temporary tracescopes, use fully named ones when using them longterm
 
         public static TraceKey A = new TraceKey(Color.LightYellow);
