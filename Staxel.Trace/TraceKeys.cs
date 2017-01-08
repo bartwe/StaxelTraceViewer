@@ -105,6 +105,9 @@ namespace Staxel.Trace {
         public static TraceKey ChunkActivityDatabase_Update = new TraceKey(Color.MediumPurple);
         public static TraceKey ServerMainLoop_SendStepPackets = new TraceKey(Color.Orange);
         public static TraceKey Entities_SendEntityPackets = new TraceKey(Color.Red);
+        public static TraceKey SoundManager_Update = new TraceKey(Color.Blue);
+
+        
 
 
         // usable for temporary tracescopes, use fully named ones when using them longterm
