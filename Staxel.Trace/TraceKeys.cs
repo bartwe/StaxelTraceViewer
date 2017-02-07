@@ -107,8 +107,13 @@ namespace Staxel.Trace {
         public static TraceKey Entities_SendEntityPackets = new TraceKey(Color.Red);
         public static TraceKey SoundManager_Update = new TraceKey(Color.Blue);
 
-        
-
+        public static TraceKey WorkerManagerExecute = new TraceKey(Color.Blue);
+        public static TraceKey WorkerManagerInnerExecute = new TraceKey(Color.Blue);
+        public static TraceKey WorkerManagerFireAndForget = new TraceKey(Color.Blue);
+        public static TraceKey LightingBatchProcess = new TraceKey(Color.Yellow);
+        public static TraceKey LodServerBuildNLodChunk = new TraceKey(Color.Purple);
+        public static TraceKey LodServerBuild0LodChunk = new TraceKey(Color.MediumPurple);
+        public static TraceKey ServerWorldManagerProcessRequest = new TraceKey(Color.GreenYellow);
 
         // usable for temporary tracescopes, use fully named ones when using them longterm
 
