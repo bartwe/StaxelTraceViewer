@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace Staxel.Trace {
     public sealed class TraceRecorder {
-        const int RecordSize = 12; // must match struct Entry's size
+        const int RecordSize = 16; // must match struct Entry's size
         const int RingSize = 10000000;
         const int RingFlushSize = 1000000;
         const int WriteBufferSize = 64 * 1024;
@@ -63,7 +63,7 @@ namespace Staxel.Trace {
             _ringHead = 0;
             _ringTail = 0;
             _epoch = Stopwatch.GetTimestamp();
-            _tickRation = 1073741824000000L / Stopwatch.Frequency;
+            _tickRation = 16777216000000L / Stopwatch.Frequency;
             _ringBuffer = new TraceRecord[RingSize];
             _writeBuffer = new byte[WriteBufferSize];
             _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
@@ -95,7 +95,7 @@ namespace Staxel.Trace {
                 return;
             TraceRecord traceRecord;
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
-            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
+            traceRecord.Timestamp = (((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 24);
             traceRecord.Scope = (trace.Id << 1) | 1;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
@@ -121,7 +121,7 @@ namespace Staxel.Trace {
                 return;
             TraceRecord traceRecord;
             traceRecord.Thread = Thread.CurrentThread.ManagedThreadId;
-            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
+            traceRecord.Timestamp = (((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 24);
             traceRecord.Scope = (trace.Id << 1) | 0;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
@@ -147,7 +147,7 @@ namespace Staxel.Trace {
                 return;
             TraceRecord traceRecord;
             traceRecord.Thread = threadId;
-            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
+            traceRecord.Timestamp = (uint)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 24);
             traceRecord.Scope = (trace.Id << 1) | 1;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
@@ -173,7 +173,7 @@ namespace Staxel.Trace {
                 return;
             TraceRecord traceRecord;
             traceRecord.Thread = threadId;
-            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
+            traceRecord.Timestamp = (uint)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 24);
             traceRecord.Scope = (trace.Id << 1) | 0;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
@@ -247,6 +247,27 @@ namespace Staxel.Trace {
                 keysMap.Add(key.Id, key);
             var entries = LoadRaw(file);
             long prevTimestamp = 0;
+
+            var indexes = new int[entries.Length];
+            for (var i = 0; i < entries.Length; ++i)
+                indexes[i] = i;
+
+            Array.Sort(indexes, (a, b) => {
+                var ae = entries[a];
+                var be = entries[b];
+                var c = ae.Timestamp.CompareTo(be.Timestamp);
+                if (c != 0)
+                    return c;
+                return a.CompareTo(b);
+            });
+
+            var temp = new TraceRecord[entries.Length];
+            for (var i = 0; i < entries.Length; ++i)
+                temp[i] = entries[indexes[i]];
+
+            entries = temp;
+
+            prevTimestamp = 0;
             var entriesLimit = 0;
             for (var i = 0; i < entries.Length; ++i) {
                 var entry = entries[i];
@@ -271,13 +292,13 @@ namespace Staxel.Trace {
         public struct TraceEvent {
             public bool Enter;
             public int Thread;
-            public int Timestamp;
+            public long Timestamp;
             public TraceKey Trace;
         }
 
-        [StructLayout(LayoutKind.Explicit, Size = 12, Pack = 1)]
+        [StructLayout(LayoutKind.Explicit, Size = 16, Pack = 1)]
         struct TraceRecord {
-            [FieldOffset(0)] public int Timestamp;
+            [FieldOffset(0)] public long Timestamp;
             [FieldOffset(4)] public int Thread;
             [FieldOffset(8)] public int Scope;
         }

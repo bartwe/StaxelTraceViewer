@@ -6,10 +6,16 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using Plukit.Base;
 using Staxel.Trace;
 
 namespace Staxel.TraceViewer {
+    public static class Helper {
+            public static IEnumerable<T> Sorted<T>(this IEnumerable<T> self, Comparison<T> comparator) {
+            var temp = self.ToList();
+            temp.Sort(comparator);
+            return temp;
+        }
+}
     public partial class TraceViewerMainForm : Form {
         Bar[] _bars;
         TraceRecorder.TraceEvent[] _entries;
@@ -40,9 +46,10 @@ namespace Staxel.TraceViewer {
             var bars = new List<Bar>();
 
             if (_entries.Length > 0) {
-                OffsetHSB.Minimum = _entries[0].Timestamp;
-                OffsetHSB.Value = _entries[0].Timestamp;
-                OffsetHSB.Maximum = _entries[_entries.Length - 1].Timestamp;
+                var epoch = _entries[0].Timestamp;
+                OffsetHSB.Minimum = (int)Math.Max(0, Math.Min(int.MaxValue, _entries[0].Timestamp - epoch));
+                OffsetHSB.Value = OffsetHSB.Minimum;
+                OffsetHSB.Maximum = (int)Math.Max(OffsetHSB.Minimum, Math.Min(int.MaxValue, _entries[_entries.Length - 1].Timestamp - epoch));
 
                 var contexts = new Dictionary<int, Context>();
                 var fetchContext = new Func<int, Context>(
@@ -71,8 +78,8 @@ namespace Staxel.TraceViewer {
                                 break; // unwind over lost/missing pops
                         }
                         Bar bar;
-                        bar.Start = start.Timestamp;
-                        bar.End = entry.Timestamp;
+                        bar.Start = start.Timestamp - epoch;
+                        bar.End = entry.Timestamp - epoch;
                         if (bar.Start == bar.End)
                             bar.End = 1 + bar.End;
                         bar.Trace = start.Trace;
@@ -346,9 +353,9 @@ namespace Staxel.TraceViewer {
 
         struct Bar {
             public int ContextOffset;
-            public int End;
+            public long End;
             public int Row;
-            public int Start;
+            public long Start;
             public TraceKey Trace;
             public bool LateFrame;
             public bool HorribleFrame;

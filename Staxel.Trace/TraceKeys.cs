@@ -118,6 +118,9 @@ namespace Staxel.Trace {
         public static TraceKey DykstraGridProcess = new TraceKey(Color.Orange);
         public static TraceKey PathFinderFindPathMesh = new TraceKey(Color.White);
 
+        public static TraceKey PathFindCoroutine = new TraceKey(Color.Tomato);
+        public static TraceKey VillagerScript = new TraceKey(Color.Thistle);
+        public static TraceKey DialogueStateMoveTo = new TraceKey(Color.Navy);
 
         // usable for temporary tracescopes, use fully named ones when using them longterm
 
@@ -148,8 +151,6 @@ namespace Staxel.Trace {
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
 
-        public static TraceKey PathFindCoroutine = new TraceKey("PathFindCoroutine", 1000001, Color.GreenYellow);
-
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
             var id = 1;
@@ -161,6 +162,9 @@ namespace Staxel.Trace {
                 Keys.Add(scope);
             }
         }
+
+
+
 
         public static IEnumerable<TraceKey> All() {
             return Keys;
