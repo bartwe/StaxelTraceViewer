@@ -18,6 +18,7 @@ namespace Staxel.TraceViewer {
         bool _updatePending;
         bool _updateRequested;
         bool _filter;
+        int _contextCount;
 
         public TraceViewerMainForm() {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
@@ -69,7 +70,6 @@ namespace Staxel.TraceViewer {
                             if (start.Trace == entry.Trace)
                                 break; // unwind over lost/missing pops
                         }
-
                         Bar bar;
                         bar.Start = start.Timestamp;
                         bar.End = entry.Timestamp;
@@ -85,8 +85,11 @@ namespace Staxel.TraceViewer {
                     skip_entry:
                     {}
                 }
+                _contextCount = contexts.Count;
             }
             _bars = bars.ToArray();
+            if (_contextCount < 1)
+                _contextCount = 1;
 
             var lateFrame = false;
             var horribleFrame = false;
@@ -198,7 +201,7 @@ namespace Staxel.TraceViewer {
             const float yScale = 1.0f;
             const float stackScale = 16.0f;
             const float topOffset = 32.0f;
-            const float contextScale = 100.0f;
+            var contextScale = Height / (float)_contextCount;
 
             OffsetHSB.LargeChange = (int)Math.Min(int.MaxValue, ((OffsetHSB.Maximum - OffsetHSB.Minimum) / 1000.0) / scaling);
             var epoch = (int)(OffsetHSB.Value - _newScreenBuffer.Width / xScale * 0.5);

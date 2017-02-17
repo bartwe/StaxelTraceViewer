@@ -137,6 +137,58 @@ namespace Staxel.Trace {
         }
 
         [Conditional("TRACE")]
+        [TargetedPatchingOptOut("")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Enter(TraceKey trace, int threadId) {
+            if (EnterHook != null)
+                EnterHook(trace);
+            trace.EnterTimestamp = Stopwatch.GetTimestamp();
+            if (_file == null)
+                return;
+            TraceRecord traceRecord;
+            traceRecord.Thread = threadId;
+            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
+            traceRecord.Scope = (trace.Id << 1) | 1;
+            var lockTaken = false;
+            _lock.Enter(ref lockTaken);
+            _ringBuffer[_ringHead++] = traceRecord;
+            if (_ringHead == RingSize)
+                _ringHead = 0;
+            if (_ringTail == _ringHead) {
+                _ringTail++;
+                if (_ringTail > RingSize)
+                    _ringTail = 0;
+            }
+            _lock.Exit();
+        }
+
+        [Conditional("TRACE")]
+        [TargetedPatchingOptOut("")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Leave(TraceKey trace, int threadId) {
+            if (LeaveHook != null)
+                LeaveHook(trace);
+            trace.LiveDuration += Stopwatch.GetTimestamp() - trace.EnterTimestamp;
+            if (_file == null)
+                return;
+            TraceRecord traceRecord;
+            traceRecord.Thread = threadId;
+            traceRecord.Timestamp = (int)(((Stopwatch.GetTimestamp() - _epoch) * _tickRation) >> 30);
+            traceRecord.Scope = (trace.Id << 1) | 0;
+            var lockTaken = false;
+            _lock.Enter(ref lockTaken);
+            _ringBuffer[_ringHead++] = traceRecord;
+            if (_ringHead == RingSize)
+                _ringHead = 0;
+            if (_ringTail == _ringHead) {
+                _ringTail++;
+                if (_ringTail > RingSize)
+                    _ringTail = 0;
+            }
+            _lock.Exit();
+        }
+
+        [Conditional("TRACE")]
         public static unsafe void Flush(bool hard = false) {
             if (_file == null)
                 return;

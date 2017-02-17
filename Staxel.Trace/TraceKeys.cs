@@ -114,6 +114,10 @@ namespace Staxel.Trace {
         public static TraceKey LodServerBuildNLodChunk = new TraceKey(Color.Purple);
         public static TraceKey LodServerBuild0LodChunk = new TraceKey(Color.MediumPurple);
         public static TraceKey ServerWorldManagerProcessRequest = new TraceKey(Color.GreenYellow);
+        public static TraceKey PathFinderFindPath = new TraceKey(Color.GreenYellow);
+        public static TraceKey DykstraGridProcess = new TraceKey(Color.Orange);
+        public static TraceKey PathFinderFindPathMesh = new TraceKey(Color.White);
+
 
         // usable for temporary tracescopes, use fully named ones when using them longterm
 
@@ -144,13 +148,16 @@ namespace Staxel.Trace {
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
 
+        public static TraceKey PathFindCoroutine = new TraceKey("PathFindCoroutine", 1000001, Color.GreenYellow);
+
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
             var id = 1;
             foreach (var key in props) {
                 var scope = (TraceKey)key.GetValue(null);
                 scope.Code = key.Name;
-                scope.Id = id++;
+                if (scope.Id == 0)
+                    scope.Id = id++;
                 Keys.Add(scope);
             }
         }
