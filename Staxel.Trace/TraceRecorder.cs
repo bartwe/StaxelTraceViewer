@@ -104,7 +104,7 @@ namespace Staxel.Trace {
                 _ringHead = 0;
             if (_ringTail == _ringHead) {
                 _ringTail++;
-                if (_ringTail > RingSize)
+                if (_ringTail == RingSize)
                     _ringTail = 0;
             }
             _lock.Exit();
@@ -130,7 +130,7 @@ namespace Staxel.Trace {
                 _ringHead = 0;
             if (_ringTail == _ringHead) {
                 _ringTail++;
-                if (_ringTail > RingSize)
+                if (_ringTail == RingSize)
                     _ringTail = 0;
             }
             _lock.Exit();
@@ -156,7 +156,7 @@ namespace Staxel.Trace {
                 _ringHead = 0;
             if (_ringTail == _ringHead) {
                 _ringTail++;
-                if (_ringTail > RingSize)
+                if (_ringTail == RingSize)
                     _ringTail = 0;
             }
             _lock.Exit();
@@ -182,7 +182,7 @@ namespace Staxel.Trace {
                 _ringHead = 0;
             if (_ringTail == _ringHead) {
                 _ringTail++;
-                if (_ringTail > RingSize)
+                if (_ringTail == RingSize)
                     _ringTail = 0;
             }
             _lock.Exit();
