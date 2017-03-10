@@ -4,18 +4,13 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Staxel.Trace;
+using Staxel.TraceViewer.Properties;
 
 namespace Staxel.TraceViewer {
-    public static class Helper {
-            public static IEnumerable<T> Sorted<T>(this IEnumerable<T> self, Comparison<T> comparator) {
-            var temp = self.ToList();
-            temp.Sort(comparator);
-            return temp;
-        }
-}
     public partial class TraceViewerMainForm : Form {
         Bar[] _bars;
         TraceRecorder.TraceEvent[] _entries;
@@ -33,7 +28,19 @@ namespace Staxel.TraceViewer {
         }
 
         void TraceViewerMainForm_Load(object sender, EventArgs e) {
+            try {
+                if (!string.IsNullOrEmpty(Settings.Default.FileDialogPath)) {
+                    var dir = new DirectoryInfo(Path.GetFullPath(Settings.Default.FileDialogPath));
+                    if (dir.Exists)
+                        StaxelTraceOpenFileDialog.InitialDirectory = Settings.Default.FileDialogPath;
+                }
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex);
+            }
             if (StaxelTraceOpenFileDialog.ShowDialog() == DialogResult.OK) {
+                Settings.Default.FileDialogPath = Path.GetDirectoryName(Path.GetFullPath(StaxelTraceOpenFileDialog.FileName));
+                Settings.Default.Save();
                 LoadFromFile(StaxelTraceOpenFileDialog.FileName);
                 BringToFront();
             }

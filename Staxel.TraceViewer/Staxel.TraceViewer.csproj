@@ -47,6 +47,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper.cs" />
     <Compile Include="TraceViewerMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
