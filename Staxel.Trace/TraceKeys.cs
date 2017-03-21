@@ -164,8 +164,6 @@ namespace Staxel.Trace {
         }
 
 
-
-
         public static IEnumerable<TraceKey> All() {
             return Keys;
         }
