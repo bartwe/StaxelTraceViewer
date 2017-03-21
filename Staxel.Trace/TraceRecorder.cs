@@ -303,7 +303,7 @@ namespace Staxel.Trace {
             [FieldOffset(8)] public int Scope;
         }
 
-        sealed class UnsafeNativeMethods {
+        static class UnsafeNativeMethods {
             [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
             internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
         }
