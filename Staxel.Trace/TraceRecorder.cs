@@ -56,18 +56,20 @@ namespace Staxel.Trace {
         public static void Start() {
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            if (_file != null) {
-                _lock.Exit();
-                return;
+            try {
+                if (_file != null)
+                    return;
+                _ringHead = 0;
+                _ringTail = 0;
+                _epoch = Stopwatch.GetTimestamp();
+                _tickRation = 16777216000000L / Stopwatch.Frequency;
+                _ringBuffer = new TraceRecord[RingSize];
+                _writeBuffer = new byte[WriteBufferSize];
+                _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
             }
-            _ringHead = 0;
-            _ringTail = 0;
-            _epoch = Stopwatch.GetTimestamp();
-            _tickRation = 16777216000000L / Stopwatch.Frequency;
-            _ringBuffer = new TraceRecord[RingSize];
-            _writeBuffer = new byte[WriteBufferSize];
-            _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
-            _lock.Exit();
+            finally {
+                _lock.Exit();
+            }
         }
 
         [Conditional("TRACE")]
@@ -75,13 +77,17 @@ namespace Staxel.Trace {
             Flush(true);
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            if (_file != null) {
-                _file.Close();
-                _file = null;
+            try {
+                if (_file != null) {
+                    _file.Close();
+                    _file = null;
+                }
+                _ringBuffer = null;
+                _writeBuffer = null;
             }
-            _ringBuffer = null;
-            _writeBuffer = null;
-            _lock.Exit();
+            finally {
+                _lock.Exit();
+            }
         }
 
         [Conditional("TRACE")]
