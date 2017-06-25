@@ -15,8 +15,6 @@ namespace Staxel.Trace {
         const int RingFlushSize = 1000000;
         const int WriteBufferSize = 64 * 1024;
         const int QueueSize = 100;
-        public static Action<TraceKey> EnterHook;
-        public static Action<TraceKey> LeaveHook;
         static SpinLock _lock = new SpinLock();
         static int _ringTail;
         static int _ringHead;
@@ -94,9 +92,6 @@ namespace Staxel.Trace {
         [TargetedPatchingOptOut("")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Enter(TraceKey trace) {
-            if (EnterHook != null)
-                EnterHook(trace);
-            trace.EnterTimestamp = Stopwatch.GetTimestamp();
             if (_file == null)
                 return;
             TraceRecord traceRecord;
@@ -120,9 +115,6 @@ namespace Staxel.Trace {
         [TargetedPatchingOptOut("")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Leave(TraceKey trace) {
-            if (LeaveHook != null)
-                LeaveHook(trace);
-            trace.LiveDuration += Stopwatch.GetTimestamp() - trace.EnterTimestamp;
             if (_file == null)
                 return;
             TraceRecord traceRecord;
@@ -146,9 +138,6 @@ namespace Staxel.Trace {
         [TargetedPatchingOptOut("")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Enter(TraceKey trace, int threadId) {
-            if (EnterHook != null)
-                EnterHook(trace);
-            trace.EnterTimestamp = Stopwatch.GetTimestamp();
             if (_file == null)
                 return;
             TraceRecord traceRecord;
@@ -172,9 +161,6 @@ namespace Staxel.Trace {
         [TargetedPatchingOptOut("")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Leave(TraceKey trace, int threadId) {
-            if (LeaveHook != null)
-                LeaveHook(trace);
-            trace.LiveDuration += Stopwatch.GetTimestamp() - trace.EnterTimestamp;
             if (_file == null)
                 return;
             TraceRecord traceRecord;
