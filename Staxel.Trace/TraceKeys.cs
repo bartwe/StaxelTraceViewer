@@ -30,6 +30,7 @@ namespace Staxel.Trace {
         public static TraceKey ChunkRenderer_Render = new TraceKey(Color.Brown);
         public static TraceKey ChunkRenderer_PendingBuildQueue = new TraceKey(Color.White);
         public static TraceKey WorldRenderer_FetchRenderChunks = new TraceKey(Color.Blue);
+        public static TraceKey WorldRenderer_PrepareRenderChunks = new TraceKey(Color.Blue);
         public static TraceKey WorldRenderer_BuildInline = new TraceKey(Color.Red);
         public static TraceKey ChunkRendererHelper_Prepare = new TraceKey(Color.Red);
         public static TraceKey WorldRenderer_Cleanup = new TraceKey(Color.Green);
