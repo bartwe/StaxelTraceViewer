@@ -57,12 +57,20 @@ namespace Staxel.Trace {
             try {
                 if (_file != null)
                     return;
+                try {
+                    _ringBuffer = new TraceRecord[RingSize];
+                    _writeBuffer = new byte[WriteBufferSize];
+                }
+                catch (Exception e) {
+                    Console.WriteLine("Failed to allocate buffers for trace recording");
+                    _ringBuffer = null;
+                    _writeBuffer = null;
+                    return;
+                }
                 _ringHead = 0;
                 _ringTail = 0;
                 _epoch = Stopwatch.GetTimestamp();
                 _tickRation = 16777216000000L / Stopwatch.Frequency;
-                _ringBuffer = new TraceRecord[RingSize];
-                _writeBuffer = new byte[WriteBufferSize];
                 _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
             }
             finally {
