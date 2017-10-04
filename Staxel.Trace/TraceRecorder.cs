@@ -15,7 +15,7 @@ namespace Staxel.Trace {
         const int RingFlushSize = 1000000;
         const int WriteBufferSize = 64 * 1024;
         const int QueueSize = 100;
-        static SpinLock _lock = new SpinLock();
+        static SpinLock _lock = new SpinLock(Debugger.IsAttached);
         static int _ringTail;
         static int _ringHead;
         static FileStream _file;
