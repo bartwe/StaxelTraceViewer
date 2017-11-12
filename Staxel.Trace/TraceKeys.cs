@@ -6,6 +6,8 @@ namespace Staxel.Trace {
     [Obfuscation(Exclude = true)]
     public sealed class TraceKeys {
         static readonly List<TraceKey> Keys = new List<TraceKey>();
+        public static string[] KeyNames;
+
         // Hardcoded for now, open to improvement
         public static TraceKey ClientMainLoop_Draw = new TraceKey(Color.LightGreen);
         public static TraceKey Multiverse_Update = new TraceKey(Color.Purple);
@@ -152,16 +154,28 @@ namespace Staxel.Trace {
         public static TraceKey Y = new TraceKey(Color.LightYellow);
         public static TraceKey Z = new TraceKey(Color.LightYellow);
 
+        //always append to end to not break existing tracefiles
+
+        public static TraceKey CounterManagerUpdate = new TraceKey(Color.Navy);
+
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
             var id = 1;
+            var maxId = -1;
             foreach (var key in props) {
-                var scope = (TraceKey)key.GetValue(null);
-                scope.Code = key.Name;
-                if (scope.Id == 0)
-                    scope.Id = id++;
-                Keys.Add(scope);
+                if (key.FieldType == typeof(TraceKey)) {
+                    var scope = (TraceKey)key.GetValue(null);
+                    scope.Code = key.Name;
+                    if (scope.Id == 0)
+                        scope.Id = id++;
+                    Keys.Add(scope);
+                    if (scope.Id > maxId)
+                        maxId = scope.Id;
+                }
             }
+            KeyNames = new string[maxId+1];
+            foreach (var entry in Keys)
+                KeyNames[entry.Id] = entry.Code;
         }
 
 

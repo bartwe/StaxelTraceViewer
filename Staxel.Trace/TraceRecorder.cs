@@ -11,44 +11,17 @@ using System.Threading;
 namespace Staxel.Trace {
     public sealed class TraceRecorder {
         const int RecordSize = 16; // must match struct Entry's size
-        const int RingSize = 10000000;
-        const int RingFlushSize = 1000000;
+        const int RingFlushSize = 524288;
+        const int RingSize = RingFlushSize * 2;
         const int WriteBufferSize = 64 * 1024;
-        const int QueueSize = 100;
         static SpinLock _lock = new SpinLock(Debugger.IsAttached);
         static int _ringTail;
         static int _ringHead;
         static FileStream _file;
         static long _epoch;
         static long _tickRation;
-        static long _lastDuration;
-        public static double AverageDuration;
-        public static double MaximumDuration;
-        public static double FrameDuration;
         static TraceRecord[] _ringBuffer;
         static byte[] _writeBuffer;
-
-        [Conditional("TRACE")]
-        public static void CalcInterval() {
-            var now = Stopwatch.GetTimestamp();
-            var duration = now - _lastDuration;
-            _lastDuration = now;
-            Averages.Enqueue(duration);
-            if (Averages.Count > QueueSize)
-                Averages.Dequeue();
-
-            var sum = 0.0;
-            var max = 0.0;
-            foreach (var entry in Averages) {
-                if (entry > max)
-                    max = entry;
-                sum += entry;
-            }
-
-            AverageDuration = (sum / Averages.Count) / Stopwatch.Frequency;
-            MaximumDuration = max / Stopwatch.Frequency;
-            FrameDuration = (double)duration / Stopwatch.Frequency;
-        }
 
         [Conditional("TRACE")]
         public static void Start() {
@@ -58,8 +31,10 @@ namespace Staxel.Trace {
                 if (_file != null)
                     return;
                 try {
-                    _ringBuffer = new TraceRecord[RingSize];
-                    _writeBuffer = new byte[WriteBufferSize];
+                    if (_ringBuffer == null)
+                        _ringBuffer = new TraceRecord[RingSize];
+                    if (_writeBuffer == null)
+                        _writeBuffer = new byte[WriteBufferSize];
                 }
                 catch (Exception e) {
                     Console.WriteLine("Failed to allocate buffers for trace recording");
@@ -79,7 +54,7 @@ namespace Staxel.Trace {
         }
 
         [Conditional("TRACE")]
-        public static void Stop() {
+        public static void Stop(bool releaseBuffers = true) {
             Flush(true);
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
@@ -88,8 +63,10 @@ namespace Staxel.Trace {
                     _file.Close();
                     _file = null;
                 }
-                _ringBuffer = null;
-                _writeBuffer = null;
+                if (releaseBuffers) {
+                    _ringBuffer = null;
+                    _writeBuffer = null;
+                }
             }
             finally {
                 _lock.Exit();
@@ -200,6 +177,7 @@ namespace Staxel.Trace {
                     entries += RingSize;
                 var flush = hard | (entries >= RingFlushSize);
                 if (flush) {
+                    Console.WriteLine("Flush trace");
                     while (_ringHead != _ringTail) {
                         var limit = _ringHead;
                         if (limit < _ringTail)
@@ -299,15 +277,13 @@ namespace Staxel.Trace {
         [StructLayout(LayoutKind.Explicit, Size = 16, Pack = 1)]
         struct TraceRecord {
             [FieldOffset(0)] public long Timestamp;
-            [FieldOffset(4)] public int Thread;
-            [FieldOffset(8)] public int Scope;
+            [FieldOffset(8)] public int Thread;
+            [FieldOffset(12)] public int Scope;
         }
 
         static class UnsafeNativeMethods {
             [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
             internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
         }
-
-        static readonly Queue<long> Averages = new Queue<long>(QueueSize);
     }
 }
