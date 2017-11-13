@@ -157,6 +157,7 @@ namespace Staxel.Trace {
         //always append to end to not break existing tracefiles
 
         public static TraceKey CounterManagerUpdate = new TraceKey(Color.Navy);
+        public static TraceKey CounterManagerMemory = new TraceKey(Color.Navy);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
