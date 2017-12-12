@@ -158,6 +158,8 @@ namespace Staxel.Trace {
 
         public static TraceKey CounterManagerUpdate = new TraceKey(Color.Navy);
         public static TraceKey CounterManagerMemory = new TraceKey(Color.Navy);
+        public static TraceKey BrowserRenderSurface_Update = new TraceKey(Color.Navy);
+        
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
