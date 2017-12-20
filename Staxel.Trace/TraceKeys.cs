@@ -159,7 +159,9 @@ namespace Staxel.Trace {
         public static TraceKey CounterManagerUpdate = new TraceKey(Color.Navy);
         public static TraceKey CounterManagerMemory = new TraceKey(Color.Navy);
         public static TraceKey BrowserRenderSurface_Update = new TraceKey(Color.Navy);
-        
+        public static TraceKey ChunkDatabaseInitialize = new TraceKey(Color.Coral);
+        public static TraceKey ServerWorldManagerTryQuickComplete = new TraceKey(Color.HotPink);
+        public static TraceKey ServerWorldManagerGenerateChunk = new TraceKey(Color.SaddleBrown);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
@@ -180,7 +182,6 @@ namespace Staxel.Trace {
             foreach (var entry in Keys)
                 KeyNames[entry.Id] = entry.Code;
         }
-
 
         public static IEnumerable<TraceKey> All() {
             return Keys;
