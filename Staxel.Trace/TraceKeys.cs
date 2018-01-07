@@ -10,7 +10,7 @@ namespace Staxel.Trace {
 
         // Hardcoded for now, open to improvement
         public static TraceKey ClientMainLoop_Draw = new TraceKey(Color.LightGreen);
-        public static TraceKey Multiverse_Update = new TraceKey(Color.Purple);
+        public static TraceKey UniverseManager_Update = new TraceKey(Color.Purple);
         public static TraceKey Universe_Update = new TraceKey(Color.Blue);
         public static TraceKey Universe_RenderUpdate = new TraceKey(Color.Red);
         public static TraceKey ClientMainLoop_Update = new TraceKey(Color.LightYellow);
@@ -55,7 +55,7 @@ namespace Staxel.Trace {
         public static TraceKey Server_RequestReload = new TraceKey(Color.Red);
         public static TraceKey Server_Update_Packets = new TraceKey(Color.LawnGreen);
         public static TraceKey Server_Update_ConnectionsClosed = new TraceKey(Color.Blue);
-        public static TraceKey Server_Update_Multiverse = new TraceKey(Color.LightGreen);
+        public static TraceKey Server_Update_UniverseManager = new TraceKey(Color.LightGreen);
         public static TraceKey Server_Update_Behavior = new TraceKey(Color.Red);
         public static TraceKey Server_Update_Connections = new TraceKey(Color.White);
         public static TraceKey ClientServerChunkManager_Update = new TraceKey(Color.Brown);
@@ -73,7 +73,7 @@ namespace Staxel.Trace {
         public static TraceKey PlayerEntityLogic_Update_EntityRayIntersect = new TraceKey(Color.Aqua);
         public static TraceKey PlayerEntityLogic_Update_Camera = new TraceKey(Color.White);
         public static TraceKey EntityUniverseFacade_InnerTerrainRayIntersect_ReadTiles = new TraceKey(Color.Brown);
-        public static TraceKey Multiverse_Update_Universe = new TraceKey(Color.DarkKhaki);
+        public static TraceKey UniverseManager_Update_Universe = new TraceKey(Color.DarkKhaki);
         public static TraceKey LodClient_Draw = new TraceKey(Color.GreenYellow);
         public static TraceKey LodClient_Update = new TraceKey(Color.Blue);
         public static TraceKey LodClient_RebuildVisibility = new TraceKey(Color.Red);
