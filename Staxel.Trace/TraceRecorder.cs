@@ -85,13 +85,15 @@ namespace Staxel.Trace {
             traceRecord.Scope = (trace.Id << 1) | 1;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            _ringBuffer[_ringHead++] = traceRecord;
-            if (_ringHead == RingSize)
-                _ringHead = 0;
-            if (_ringTail == _ringHead) {
-                _ringTail++;
-                if (_ringTail == RingSize)
-                    _ringTail = 0;
+            if (_file != null) {
+                _ringBuffer[_ringHead++] = traceRecord;
+                if (_ringHead == RingSize)
+                    _ringHead = 0;
+                if (_ringTail == _ringHead) {
+                    _ringTail++;
+                    if (_ringTail == RingSize)
+                        _ringTail = 0;
+                }
             }
             _lock.Exit();
         }
@@ -108,13 +110,15 @@ namespace Staxel.Trace {
             traceRecord.Scope = (trace.Id << 1) | 0;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            _ringBuffer[_ringHead++] = traceRecord;
-            if (_ringHead == RingSize)
-                _ringHead = 0;
-            if (_ringTail == _ringHead) {
-                _ringTail++;
-                if (_ringTail == RingSize)
-                    _ringTail = 0;
+            if (_file != null) {
+                _ringBuffer[_ringHead++] = traceRecord;
+                if (_ringHead == RingSize)
+                    _ringHead = 0;
+                if (_ringTail == _ringHead) {
+                    _ringTail++;
+                    if (_ringTail == RingSize)
+                        _ringTail = 0;
+                }
             }
             _lock.Exit();
         }
@@ -131,13 +135,15 @@ namespace Staxel.Trace {
             traceRecord.Scope = (trace.Id << 1) | 1;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            _ringBuffer[_ringHead++] = traceRecord;
-            if (_ringHead == RingSize)
-                _ringHead = 0;
-            if (_ringTail == _ringHead) {
-                _ringTail++;
-                if (_ringTail == RingSize)
-                    _ringTail = 0;
+            if (_file != null) {
+                _ringBuffer[_ringHead++] = traceRecord;
+                if (_ringHead == RingSize)
+                    _ringHead = 0;
+                if (_ringTail == _ringHead) {
+                    _ringTail++;
+                    if (_ringTail == RingSize)
+                        _ringTail = 0;
+                }
             }
             _lock.Exit();
         }
@@ -154,13 +160,15 @@ namespace Staxel.Trace {
             traceRecord.Scope = (trace.Id << 1) | 0;
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
-            _ringBuffer[_ringHead++] = traceRecord;
-            if (_ringHead == RingSize)
-                _ringHead = 0;
-            if (_ringTail == _ringHead) {
-                _ringTail++;
-                if (_ringTail == RingSize)
-                    _ringTail = 0;
+            if (_file != null) {
+                _ringBuffer[_ringHead++] = traceRecord;
+                if (_ringHead == RingSize)
+                    _ringHead = 0;
+                if (_ringTail == _ringHead) {
+                    _ringTail++;
+                    if (_ringTail == RingSize)
+                        _ringTail = 0;
+                }
             }
             _lock.Exit();
         }
@@ -172,33 +180,35 @@ namespace Staxel.Trace {
             var lockTaken = false;
             _lock.Enter(ref lockTaken);
             try {
-                var entries = _ringHead - _ringTail;
-                if (entries < 0)
-                    entries += RingSize;
-                var flush = hard | (entries >= RingFlushSize);
-                if (flush) {
-                    Console.WriteLine("Flush trace");
-                    while (_ringHead != _ringTail) {
-                        var limit = _ringHead;
-                        if (limit < _ringTail)
-                            limit = RingSize;
-                        var length = limit - _ringTail;
-                        if (length > _writeBuffer.Length / RecordSize)
-                            length = _writeBuffer.Length / RecordSize;
-                        var bytes = length * RecordSize;
-                        {
-                            fixed (TraceRecord* from = &_ringBuffer[_ringTail])
-                            fixed (byte* to = &_writeBuffer[0]) {
-                                UnsafeNativeMethods.MoveMemory(to, from, bytes);
+                if (_file != null) {
+                    var entries = _ringHead - _ringTail;
+                    if (entries < 0)
+                        entries += RingSize;
+                    var flush = hard | (entries >= RingFlushSize);
+                    if (flush) {
+                        Console.WriteLine("Flush trace");
+                        while (_ringHead != _ringTail) {
+                            var limit = _ringHead;
+                            if (limit < _ringTail)
+                                limit = RingSize;
+                            var length = limit - _ringTail;
+                            if (length > _writeBuffer.Length / RecordSize)
+                                length = _writeBuffer.Length / RecordSize;
+                            var bytes = length * RecordSize;
+                            {
+                                fixed (TraceRecord* from = &_ringBuffer[_ringTail])
+                                fixed (byte* to = &_writeBuffer[0]) {
+                                    UnsafeNativeMethods.MoveMemory(to, from, bytes);
+                                }
                             }
+                            _file.Write(_writeBuffer, 0, bytes);
+                            _ringTail += length;
+                            if (_ringTail == RingSize)
+                                _ringTail = 0;
                         }
-                        _file.Write(_writeBuffer, 0, bytes);
-                        _ringTail += length;
-                        if (_ringTail == RingSize)
-                            _ringTail = 0;
+                        if (hard)
+                            _file.Flush();
                     }
-                    if (hard)
-                        _file.Flush();
                 }
             }
             finally {
