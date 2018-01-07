@@ -162,6 +162,8 @@ namespace Staxel.Trace {
         public static TraceKey ChunkDatabaseInitialize = new TraceKey(Color.Coral);
         public static TraceKey ServerWorldManagerTryQuickComplete = new TraceKey(Color.HotPink);
         public static TraceKey ServerWorldManagerGenerateChunk = new TraceKey(Color.SaddleBrown);
+        public static TraceKey EffectRenderer_Render = new TraceKey(Color.Gold);
+        public static TraceKey AnimatedTilePainter_Render = new TraceKey(Color.DarkOliveGreen);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
@@ -178,7 +180,7 @@ namespace Staxel.Trace {
                         maxId = scope.Id;
                 }
             }
-            KeyNames = new string[maxId+1];
+            KeyNames = new string[maxId + 1];
             foreach (var entry in Keys)
                 KeyNames[entry.Id] = entry.Code;
         }
