@@ -38,6 +38,7 @@ namespace Staxel.Trace {
                 }
                 catch (Exception e) {
                     Console.WriteLine("Failed to allocate buffers for trace recording");
+                    Console.WriteLine(e);
                     _ringBuffer = null;
                     _writeBuffer = null;
                     return;
