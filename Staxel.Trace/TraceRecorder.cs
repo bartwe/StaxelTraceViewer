@@ -197,7 +197,7 @@ namespace Staxel.Trace {
                                 length = _writeBuffer.Length / RecordSize;
                             var bytes = length * RecordSize;
                             {
-                                fixed (TraceRecord* from = &_ringBuffer[_ringTail])
+                                fixed (TraceRecord* from = &_ringBuffer[0])
                                 fixed (byte* to = &_writeBuffer[0]) {
                                     UnsafeNativeMethods.Copy(from, _ringTail, _ringBuffer.Length, sizeof(TraceRecord), to, 0, _writeBuffer.Length, 1, bytes);
                                 }
