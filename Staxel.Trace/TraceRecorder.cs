@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace Staxel.Trace {
     public sealed class TraceRecorder {
-        const int RecordSize = 16; // must match struct Entry's size
+        static readonly unsafe int RecordSize = sizeof(TraceRecord);
         const int RingFlushSize = 524288;
         const int RingSize = RingFlushSize * 2;
         const int WriteBufferSize = 64 * 1024;
@@ -199,7 +199,7 @@ namespace Staxel.Trace {
                             {
                                 fixed (TraceRecord* from = &_ringBuffer[_ringTail])
                                 fixed (byte* to = &_writeBuffer[0]) {
-                                    UnsafeNativeMethods.MoveMemory(to, from, bytes);
+                                    UnsafeNativeMethods.Copy(from, _ringTail, _ringBuffer.Length, sizeof(TraceRecord), to, 0, _writeBuffer.Length, 1, bytes);
                                 }
                             }
                             _file.Write(_writeBuffer, 0, bytes);
@@ -225,7 +225,7 @@ namespace Staxel.Trace {
                 return result;
             fixed (byte* from = &bytes[0])
             fixed (TraceRecord* to = &result[0]) {
-                UnsafeNativeMethods.MoveMemory(to, from, entries * RecordSize);
+                UnsafeNativeMethods.Copy(from, 0, bytes.Length, 1, to, 0, result.Length, sizeof(TraceRecord), entries * RecordSize);
             }
             return result;
         }
@@ -294,7 +294,48 @@ namespace Staxel.Trace {
 
         static class UnsafeNativeMethods {
             [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
-            internal static extern unsafe void MoveMemory(void* dest, void* src, int size);
+            static extern unsafe void MoveMemory(void* dest, void* src, int size);
+
+            public static unsafe void Copy(void* from, int fromOffset, int fromTotalLength, int fromElementSize, void* target, int targetOffset, int targetTotalLength, int targetElementSize, int bytes) {
+                if (bytes == 0)
+                    return;
+                if (bytes < 0)
+                    throw new ArgumentOutOfRangeException("bytes");
+                if (from == null)
+                    throw new ArgumentNullException("from");
+                if (target == null)
+                    throw new ArgumentNullException("to");
+                if (fromOffset < 0)
+                    throw new ArgumentOutOfRangeException("fromOffset");
+                if (targetOffset < 0)
+                    throw new ArgumentOutOfRangeException("targetOffset");
+                if (fromTotalLength < 0)
+                    throw new ArgumentOutOfRangeException("fromTotalLength");
+                if (targetTotalLength < 0)
+                    throw new ArgumentOutOfRangeException("targetTotalLength");
+                if (fromOffset >= fromTotalLength)
+                    throw new ArgumentOutOfRangeException("fromOffset");
+                if (targetOffset >= targetTotalLength)
+                    throw new ArgumentOutOfRangeException("targetOffset");
+                if (fromElementSize <= 0)
+                    throw new ArgumentOutOfRangeException("fromElementSize");
+                if (targetElementSize <= 0)
+                    throw new ArgumentOutOfRangeException("targetElementSize");
+
+                fromOffset *= fromElementSize;
+                fromTotalLength *= fromElementSize;
+
+                targetOffset *= targetElementSize;
+                targetTotalLength *= targetElementSize;
+
+                if (fromTotalLength - fromOffset < bytes)
+                    throw new ArgumentOutOfRangeException("bytes");
+
+                if (targetTotalLength - targetOffset < bytes)
+                    throw new ArgumentOutOfRangeException("bytes");
+
+                MoveMemory((byte*)target + targetOffset, (byte*)from + fromOffset, bytes);
+            }
         }
     }
 }
