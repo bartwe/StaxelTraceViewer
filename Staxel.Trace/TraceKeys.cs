@@ -165,6 +165,7 @@ namespace Staxel.Trace {
         public static TraceKey EffectRenderer_Render = new TraceKey(Color.Gold);
         public static TraceKey AnimatedTilePainter_Render = new TraceKey(Color.DarkOliveGreen);
         public static TraceKey LongLiveVertexStorageBacking_Bind = new TraceKey(Color.Gold);
+        public static TraceKey ChunkEntitiesManager_LoadEntity = new TraceKey(Color.Red);
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
