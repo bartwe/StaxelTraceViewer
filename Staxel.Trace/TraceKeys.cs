@@ -170,7 +170,7 @@ namespace Staxel.Trace {
         public static TraceKey CefInitializeWait = new TraceKey(Color.Indigo);
         public static TraceKey BrowserCoreInitialization = new TraceKey(Color.Gold);
         public static TraceKey StreamInitialization = new TraceKey(Color.Navy);
-        
+        public static TraceKey WorkerManagerForeach = new TraceKey(Color.HotPink);
         
 
         static TraceKeys() {
