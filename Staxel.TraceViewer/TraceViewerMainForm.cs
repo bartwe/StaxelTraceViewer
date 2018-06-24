@@ -245,10 +245,10 @@ namespace Staxel.TraceViewer {
                     const double secondInterval = 1000000;
                     const double minuteInterval = 1000000 * 60;
 
-                    renderLines(milliSecondInterval, Pens.White);
-                    renderLines(secondInterval, Pens.Gray);
-                    renderLines(minuteInterval, Pens.DarkGray);
                     renderLines(fpsInterval, Pens.Black);
+                    renderLines(milliSecondInterval, Pens.White);
+                    renderLines(secondInterval, Pens.Yellow);
+                    renderLines(minuteInterval, Pens.GreenYellow);
 
                     const int steps = 20;
                     for (var i = 0; i < steps; ++i) {
