@@ -70,7 +70,9 @@ namespace Staxel.TraceViewer {
                         return result;
                     });
 
-                foreach (var entry in _entries) {
+//                for (int i = Math.Max(0, _entries.Length - 48000000); i<_entries.Length; ++i) {
+                for (int i = 0; i < _entries.Length; ++i) {
+                    var entry = _entries[i];
                     var context = fetchContext(entry.Thread);
                     if (entry.Enter) {
                         context.Stack.Push(entry);
