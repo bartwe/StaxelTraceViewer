@@ -14,6 +14,7 @@ namespace Staxel.TraceViewer {
     public partial class TraceViewerMainForm : Form {
         Bar[] _bars;
         TraceRecorder.TraceEvent[] _entries;
+        TraceKey[] _traceMap;
         Bitmap _newScreenBuffer;
         Bitmap _screenBuffer;
         bool _updatePending;
@@ -49,8 +50,8 @@ namespace Staxel.TraceViewer {
         }
 
         void LoadFromFile(string file) {
-            _entries = TraceRecorder.Load(file, TraceKeys.All());
-            var bars = new List<Bar>();
+            TraceRecorder.Load(file, TraceKeys.All(), ref _entries, ref _traceMap);
+            _bars = new Bar[0];
 
             if (_entries.Length > 0) {
                 var epoch = _entries[0].Timestamp;
@@ -70,8 +71,14 @@ namespace Staxel.TraceViewer {
                         return result;
                     });
 
-//                for (int i = Math.Max(0, _entries.Length - 48000000); i<_entries.Length; ++i) {
-                for (int i = 0; i < _entries.Length; ++i) {
+                var barsCount = 0;
+                for (var i = 0; i < _entries.Length; ++i) {
+                    if (_entries[i].Enter)
+                        barsCount++;
+                }
+                _bars = new Bar[barsCount];
+                barsCount = 0;
+                for (var i = 0; i < _entries.Length; ++i) {
                     var entry = _entries[i];
                     var context = fetchContext(entry.Thread);
                     if (entry.Enter) {
@@ -83,7 +90,7 @@ namespace Staxel.TraceViewer {
                             if (context.Stack.Count == 0)
                                 goto skip_entry; // unbalanced stack can happen due to clamped history
                             start = context.Stack.Pop();
-                            if (start.Trace == entry.Trace)
+                            if (start.TraceId == entry.TraceId)
                                 break; // unwind over lost/missing pops
                         }
                         Bar bar;
@@ -91,19 +98,18 @@ namespace Staxel.TraceViewer {
                         bar.End = entry.Timestamp - epoch;
                         if (bar.Start == bar.End)
                             bar.End = 1 + bar.End;
-                        bar.Trace = start.Trace;
+                        bar.TraceId = start.TraceId;
                         bar.Row = context.Stack.Count;
                         bar.ContextOffset = context.Offset;
                         bar.LateFrame = false;
                         bar.HorribleFrame = false;
-                        bars.Add(bar);
+                        _bars[barsCount++] = bar;
                     }
                     skip_entry:
                     {}
                 }
                 _contextCount = contexts.Count;
             }
-            _bars = bars.ToArray();
             if (_contextCount < 1)
                 _contextCount = 1;
 
@@ -129,6 +135,11 @@ namespace Staxel.TraceViewer {
                 sum.Key = key;
                 sums[key.Id] = sum;
             }
+            if (sums[0] == null)
+                sums[0] = new Sum();
+            for (var i = 0; i < sums.Length; ++i)
+                if (sums[i] == null)
+                    sums[i] = sums[0];
 
 
             var _innerDuration = new Counter[256];
@@ -140,7 +151,7 @@ namespace Staxel.TraceViewer {
                 var innerDuration = _innerDuration[bar.Row].Value;
 
                 var duration = bar.End - bar.Start;
-                var sum = sums[bar.Trace.Id];
+                var sum = sums[bar.TraceId];
                 sum.Inclusive += duration;
                 sum.Exclusive += duration - innerDuration;
                 sum.Calls++;
@@ -196,7 +207,7 @@ namespace Staxel.TraceViewer {
             UpdateBitmap();
         }
 
-        void UpdateBitmap() {
+        unsafe void UpdateBitmap() {
             if (_updatePending) {
                 _updateRequested = true;
                 return;
@@ -252,36 +263,38 @@ namespace Staxel.TraceViewer {
                     renderLines(secondInterval, Pens.Yellow);
                     renderLines(minuteInterval, Pens.GreenYellow);
 
+                    var blackBrush = new SolidBrush(Color.Black);
+
                     const int steps = 20;
                     for (var i = 0; i < steps; ++i) {
                         var px = (_newScreenBuffer.Width * i / steps);
                         var ts = (int)(px / xScale + epoch);
-                        g.DrawString(ts.ToString(CultureInfo.InvariantCulture), DefaultFont, new SolidBrush(Color.Black), px, 0.0f);
+                        g.DrawString(ts.ToString(CultureInfo.InvariantCulture), DefaultFont, blackBrush, px, 0.0f);
                     }
-                    for (var i = 0; i < _bars.Length; ++i) {
-                        var bar = _bars[i];
+                    var _barsLength = _bars.Length;
+                    fixed (Bar* barp = _bars)
+                        for (var i = 0; i < _barsLength; ++i) {
+                            var bar = &barp[i];
+                            if ((bar->End < minClamp) || (bar->Start > maxClamp))
+                                continue;
+                            if (_filter && !bar->LateFrame)
+                                continue;
 
-                        if (_filter && !bar.LateFrame)
-                            continue;
-                        if (bar.End < minClamp)
-                            continue;
-                        if (bar.Start > maxClamp)
-                            continue;
+                            var x = (bar->Start - epoch) * xScale;
+                            var ex = (bar->End - epoch) * xScale;
+                            var width = ex - x;
+                            if (width < 0.01)
+                                continue;
 
-                        var x = (bar.Start - epoch) * xScale;
-                        var ex = (bar.End - epoch) * xScale;
-                        var width = ex - x;
-                        if (width < 0.01)
-                            continue;
-
-                        var y = topOffset + bar.Row * stackScale * yScale + bar.ContextOffset * contextScale * yScale;
-                        if (width < 1.0)
-                            width = 1.0f;
-                        var height = stackScale * yScale;
-                        g.FillRectangle(new SolidBrush(bar.Trace.Color), x, y, width, height);
-                        if (width > 50)
-                            g.DrawString(bar.Trace.Code, DefaultFont, new SolidBrush(Color.Black), x, y);
-                    }
+                            var y = topOffset + bar->Row * stackScale * yScale + bar->ContextOffset * contextScale * yScale;
+                            if (width < 1.0)
+                                width = 1.0f;
+                            const float height = stackScale * yScale;
+                            var trace = _traceMap[bar->TraceId];
+                            g.FillRectangle(new SolidBrush(trace.Color), x, y, width, height);
+                            if (width > 50)
+                                g.DrawString(trace.Code, DefaultFont, blackBrush, x, y);
+                        }
                 }
                 UpdateBitmapCompleted();
             };
@@ -361,11 +374,11 @@ namespace Staxel.TraceViewer {
         }
 
         struct Bar {
-            public int ContextOffset;
             public long End;
-            public int Row;
             public long Start;
-            public TraceKey Trace;
+            public int TraceId;
+            public int ContextOffset;
+            public int Row;
             public bool LateFrame;
             public bool HorribleFrame;
         }

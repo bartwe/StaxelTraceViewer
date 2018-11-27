@@ -171,8 +171,11 @@ namespace Staxel.Trace {
         public static TraceKey BrowserCoreInitialization = new TraceKey(Color.Gold);
         public static TraceKey StreamInitialization = new TraceKey(Color.Navy);
         public static TraceKey WorkerManagerForeach = new TraceKey(Color.HotPink);
-
         public static TraceKey Entities_BuildCaches = new TraceKey(Color.HotPink);
+        public static TraceKey ServerWorldManager_DatabaseWriteWorker = new TraceKey(Color.DarkGreen);
+        public static TraceKey SoundManager_LoadSound = new TraceKey(Color.Gold);
+        
+        
         
         
 

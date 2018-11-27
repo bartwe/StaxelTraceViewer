@@ -230,10 +230,13 @@ namespace Staxel.Trace {
             return result;
         }
 
-        public static TraceEvent[] Load(string file, IEnumerable<TraceKey> keys) {
-            var keysMap = new Dictionary<int, TraceKey>();
-            foreach (var key in keys)
-                keysMap.Add(key.Id, key);
+        public unsafe static void Load(string file, IEnumerable<TraceKey> keys, ref TraceEvent[] _events, ref TraceKey[] _traceMap) {
+            var keysMap = new Dictionary<int, int>();
+            var keysList = new List<TraceKey>();
+            foreach (var key in keys) {
+                keysMap.Add(key.Id, keysList.Count);
+                keysList.Add(key);
+            }
             var entries = LoadRaw(file);
             long prevTimestamp = 0;
 
@@ -241,13 +244,17 @@ namespace Staxel.Trace {
             for (var i = 0; i < entries.Length; ++i)
                 indexes[i] = i;
 
+            var entries1 = entries;
             Array.Sort(indexes, (a, b) => {
-                var ae = entries[a];
-                var be = entries[b];
-                var c = ae.Timestamp.CompareTo(be.Timestamp);
-                if (c != 0)
-                    return c;
-                return a.CompareTo(b);
+                var ae = entries1[a].Timestamp;
+                var be = entries1[b].Timestamp;
+                if (ae < be)
+                    return -1;
+                if (ae > be)
+                    return 1;
+                if (a < b)
+                    return -1;
+                return a > b ? 1 : 0;
             });
 
             var temp = new TraceRecord[entries.Length];
@@ -265,24 +272,32 @@ namespace Staxel.Trace {
                 prevTimestamp = entry.Timestamp;
                 entriesLimit++;
             }
+            var entriesMax = 2146435071 / 24;
+            var entriesOffset = 0;
+            if (entriesLimit > entriesMax) {
+                entriesOffset = entriesLimit - entriesMax;
+                entriesLimit = entriesMax;
+            }
+
             var result = new TraceEvent[entriesLimit];
             for (var i = 0; i < entriesLimit; ++i) {
-                var entry = entries[i];
+                var entry = entries[i + entriesOffset];
                 TraceEvent e;
                 e.Timestamp = entry.Timestamp;
                 e.Thread = entry.Thread;
                 e.Enter = (entry.Scope & 1) == 1;
-                e.Trace = keysMap[entry.Scope >> 1];
+                e.TraceId = keysMap[entry.Scope >> 1];
                 result[i] = e;
             }
-            return result;
+            _events = result;
+            _traceMap = keysList.ToArray();
         }
 
         public struct TraceEvent {
-            public bool Enter;
-            public int Thread;
             public long Timestamp;
-            public TraceKey Trace;
+            public int TraceId;
+            public int Thread;
+            public bool Enter;
         }
 
         [StructLayout(LayoutKind.Explicit, Size = 16, Pack = 1)]
