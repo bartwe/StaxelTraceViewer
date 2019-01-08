@@ -47,7 +47,7 @@ namespace Staxel.Trace {
                 _ringTail = 0;
                 _epoch = Stopwatch.GetTimestamp();
                 _tickRation = 16777216000000L / Stopwatch.Frequency;
-                _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + ".staxeltrace", FileMode.CreateNew);
+                _file = new FileStream(DateTime.Now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + "_" + Guid.NewGuid().ToString("N") + ".staxeltrace", FileMode.CreateNew);
             }
             finally {
                 _lock.Exit();
@@ -230,7 +230,7 @@ namespace Staxel.Trace {
             return result;
         }
 
-        public unsafe static void Load(string file, IEnumerable<TraceKey> keys, ref TraceEvent[] _events, ref TraceKey[] _traceMap) {
+        public static unsafe void Load(string file, IEnumerable<TraceKey> keys, ref TraceEvent[] _events, ref TraceKey[] _traceMap) {
             var keysMap = new Dictionary<int, int>();
             var keysList = new List<TraceKey>();
             foreach (var key in keys) {
