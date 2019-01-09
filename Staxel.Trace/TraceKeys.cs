@@ -174,10 +174,13 @@ namespace Staxel.Trace {
         public static TraceKey Entities_BuildCaches = new TraceKey(Color.HotPink);
         public static TraceKey ServerWorldManager_DatabaseWriteWorker = new TraceKey(Color.DarkGreen);
         public static TraceKey SoundManager_LoadSound = new TraceKey(Color.Gold);
-        
-        
-        
-        
+
+        public static TraceKey ChunkDatabaseStore = new TraceKey(Color.Red);
+        public static TraceKey ChunkDatabaseGet = new TraceKey(Color.Blue);
+        public static TraceKey LightingManagerBuildRayChunk = new TraceKey(Color.Coral);
+        public static TraceKey LightingManagerBuildBounce1Chunk = new TraceKey(Color.LightBlue);
+
+
 
         static TraceKeys() {
             var props = typeof(TraceKeys).GetFields(BindingFlags.Public | BindingFlags.Static);
@@ -199,6 +202,7 @@ namespace Staxel.Trace {
                 KeyNames[entry.Id] = entry.Code;
         }
 
+        
         public static IEnumerable<TraceKey> All() {
             return Keys;
         }
